@@ -85,6 +85,8 @@
       <div class="section-heading"><div><span class="eyebrow">SUA COLEÇÃO</span><h2>Minha biblioteca</h2><p class="sub">Organize o que quer jogar, está jogando e já zerou.</p></div></div>
       <div class="panel">
         <p id="collectionStats" class="collection-stats" aria-live="polite">Sua coleção fica salva somente neste aparelho.</p>
+        <div class="collection-backup"><div><b>Backup da coleção</b><p>Leve seus favoritos e seu progresso para outro aparelho.</p></div><div class="collection-backup-actions"><button class="btn small" type="button" onclick="exportCollectionBackup()">Exportar</button><button class="btn small quiet" type="button" onclick="document.getElementById('collectionImportFile').click()">Importar</button></div><input id="collectionImportFile" type="file" accept="application/json,.json" hidden onchange="importCollectionBackup(this)"></div>
+        <p id="collectionBackupMsg" class="fineprint muted" role="status" aria-live="polite"></p>
         <div id="collectionFilters" class="collection-filters" role="group" aria-label="Filtrar minha coleção"></div>
         <div class="grid" id="favorites"></div>
         <p class="fineprint muted">Seus jogos e seu progresso ficam salvos neste navegador, sem criar conta.</p>
