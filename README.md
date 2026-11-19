@@ -19,7 +19,7 @@ URL: https://brenolfm.github.io/game-finder/
 
 - A biblioteca PS5 consulta por letra o projeto comunitário [Ephellon/game-store-catalog](https://github.com/Ephellon/game-store-catalog). É uma fonte não oficial; a presença de um registro não garante disponibilidade, edição ou preço no Brasil.
 - A RAWG é opcional e fornece dados adicionais, incluindo capturas in-game. Ao abrir um jogo da biblioteca, o app pesquisa uma correspondência na RAWG e consulta `/games/{id}/screenshots`. A chave inserida pelo usuário é armazenada no `localStorage` do navegador e enviada diretamente à API nas consultas. Em uma aplicação estática, ela pode ser vista por quem tiver acesso ao navegador e às ferramentas de desenvolvedor. Não há chave embutida no repositório.
-- O catálogo brasileiro de PlayStation Plus não está sincronizado nem preenchido com uma lista verificada. A interface deixa isso explícito e direciona à fonte oficial.
+- O filtro PS Plus usa um recorte de 24 registros PS5 da primeira página da listagem PSNDeals Brasil consultada em 18/11/2026, cruzado com o anúncio oficial brasileiro de novembro. Ele diferencia títulos do Catálogo Extra (incluídos também no Deluxe), clássicos Deluxe e testes por tempo limitado. Não é uma sincronização automática nem representa o catálogo brasileiro completo; a disponibilidade pode mudar.
 
 ## Privacidade e armazenamento
 
@@ -80,3 +80,12 @@ Ao abrir um título listado na biblioteca ou nos destaques, o aplicativo usa o n
 - Fechar a ficha invalida consultas assíncronas antigas, para impedir que uma resposta atrasada altere o jogo que está aberto.
 - A tradução automática é baseada em serviços públicos de terceiros; não é uma tradução editorial revisada e pode cometer erros em nomes próprios, termos de fantasia e expressões específicas.
 - A coleção e os favoritos continuam locais. Não há login, sincronização entre dispositivos, alertas push de lançamento ou recursos sociais. Esses recursos exigiriam uma arquitetura adicional.
+
+## Navegação em duas áreas e filtros
+
+- A navegação principal foi simplificada para **Recomendar** e **Todos os jogos**. Os ajustes ficam no botão do cabeçalho; favoritos e progresso foram incorporados à área de biblioteca em um painel recolhível.
+- A biblioteca completa carrega os 27 arquivos por letra sob demanda (incluindo títulos que começam por números) e deduplica por ID do produto. A referência comunitária informava 10.439 registros em 17/11/2026.
+- O campo de busca atualiza os resultados enquanto o usuário digita, com atraso curto para evitar consultas repetidas, e oferece sugestões de nomes encontrados.
+- Filtros disponíveis: nativo PS5 ou PS4 + PS5; recorte PS Plus Deluxe; avaliação mínima RAWG; ordenação A–Z, Z–A, maior nota e menor nota.
+- A ordenação por avaliação usa um índice local construído a partir das 160 primeiras correspondências retornadas pela RAWG entre os jogos PS5 mais bem avaliados. Portanto, títulos sem correspondência aparecem sem nota e ficam ao final; isso não equivale a uma nota verificada para os 10.439 jogos.
+- O filtro PS Plus é um recorte parcial e datado, não deve ser entendido como a lista completa de jogos incluídos no plano.
