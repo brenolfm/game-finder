@@ -1,10 +1,10 @@
 
-const KEY='gf_rawg_key',FAV='gf_favorites',PLUS='gf_plus';const CATALOG_BASE='https://raw.githubusercontent.com/Ephellon/game-store-catalog/main/ps5/';const PAGE_SIZE=24;let pageNo=1,maxPage=1,answers={},activeGame=null,installPrompt=null,catalogCache={},catalogMeta=null,catalogCurrent=[],catalogById={},activeStoreGame=null;
+const KEY='gf_rawg_key',FAV='gf_favorites',PLUS='gf_plus';const CATALOG_BASE='https://raw.githubusercontent.com/Ephellon/game-store-catalog/main/ps5/';const PAGE_SIZE=24;let pageNo=1,maxPage=1,answers={},activeGame=null,installPrompt=null,catalogCache={},catalogMeta=null,catalogCurrent=[],catalogById={},activeStoreGame=null,plusCatalog=null,plusCatalogPromise=null;
 const $=id=>document.getElementById(id),key=()=>localStorage.getItem(KEY)||'';
 function go(id){
  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===id));
  document.querySelectorAll('.nav button').forEach(x=>{const active=x.dataset.v===id;x.classList.toggle('active',active);if(active)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current')});
- if(id==='saved')renderFav();if(id==='plus')renderPlus();if(id==='settings')$('apiKey').value=key();if(id==='library'&&!$('results').dataset.loaded)searchGames(true);
+ if(id==='saved')renderFav();if(id==='plus')loadPlusCatalog().then(renderPlus);if(id==='settings')$('apiKey').value=key();if(id==='library'&&!$('results').dataset.loaded)searchGames(true);
  window.scrollTo({top:0,behavior:'smooth'});
 }
 function api(path,params){
@@ -126,12 +126,24 @@ async function recommend(){
   $('recommendations').innerHTML='<div class="result-heading"><h3>Jogos para explorar</h3><p class="sub">'+(answers.mood?'Gênero selecionado: '+esc(answers.mood.replaceAll('-',' ')):'Seleção geral de PS5')+'</p></div><div class="grid">'+(arr.length?arr.map(card).join(''):'<div class="empty">A RAWG não retornou resultados para esse filtro.</div>')+'</div><p class="fineprint muted">Sugestões baseadas nos dados de gênero e avaliação retornados pela RAWG. Confira informações e disponibilidade na loja.</p>';
  }catch(e){$('recommendations').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}
 }
+async function loadPlusCatalog(){
+ if(plusCatalogPromise)return plusCatalogPromise;
+ plusCatalogPromise=fetch('./catalogo-psplus.json',{cache:'no-cache'}).then(r=>{
+  if(!r.ok)throw Error('Lista PS Plus local indisponível.');
+  return r.json();
+ }).then(data=>{
+  plusCatalog=Array.isArray(data)?data:[];
+  return plusCatalog;
+ }).catch(()=>{plusCatalog=[];return plusCatalog});
+ return plusCatalogPromise;
+}
 function renderPlus(){
- const arr=read(PLUS),q=($('psSearch').value||'').toLowerCase(),tier=$('psTier').value,plat=$('psPlatform').value;
- const filtered=arr.filter(x=>(!q||String(x.name||'').toLowerCase().includes(q))&&(!tier||x.tier===tier)&&(!plat||x.platform===plat));
+ const source=plusCatalog&&plusCatalog.length?plusCatalog:read(PLUS);
+ const q=($('psSearch').value||'').toLowerCase(),tier=$('psTier').value,plat=$('psPlatform').value;
+ const filtered=source.filter(x=>(!q||String(x.name||'').toLowerCase().includes(q))&&(!tier||x.tier===tier)&&(!plat||x.platform===plat));
  $('plusList').innerHTML=filtered.length?filtered.map(x=>'<article class="card"><div class="cardbody"><h3>'+esc(x.name)+'</h3><div class="chips"><span class="chip">'+esc(x.platform)+'</span><span class="chip">'+esc(x.tier)+'</span></div><p>Verificado em: '+esc(x.checked_at||'—')+'</p></div></article>'):'<div class="empty">A lista brasileira ainda não foi cadastrada e validada. Nenhum jogo será marcado como incluído sem confirmação regional.</div>';
 }
 async function installApp(){if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null}else alert('No Chrome: menu ⋮ > Instalar app ou Adicionar à tela inicial. No Samsung Internet: menu ☰ > Adicionar página a > Tela inicial.')}
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e});
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.warn));
-buildQuestions();renderPlus();renderFav();if(key())$('status').textContent='● RAWG configurada';else $('status').textContent='● Catálogo PS5 pronto';
+buildQuestions();loadPlusCatalog().then(renderPlus);renderFav();if(key())$('status').textContent='● RAWG configurada';else $('status').textContent='● Catálogo PS5 pronto';
