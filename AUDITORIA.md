@@ -21,7 +21,7 @@ Inspeção do HTML, CSS, JavaScript, manifesto PWA, service worker, arquivo de c
 - Capas de jogos usam hosts HTTPS permitidos e carregamento tardio.
 - O questionário foi simplificado: antes perguntava sobre tempo e cooperação, mas a busca não aplicava esses filtros. Agora só oferece o filtro de gênero que realmente é enviado à RAWG.
 - A biblioteca deixa de exibir data/contagem de referência inventada quando o arquivo de metadados não responde.
-- O catálogo Plus agora lê `catalogo-psplus.json`; permanece vazio até haver dados regionais verificados.
+- O catálogo Plus lê `catalogo-psplus.json`, com um recorte de 24 registros PS5 do Brasil consultado em 18/11/2026; a lista é parcial e não se atualiza automaticamente.
 - O acesso de instalação PWA permanece disponível em Ajustes.
 
 ## Situação por área
@@ -115,7 +115,7 @@ A navegação por teclado e os estados de foco foram melhorados. Ainda seria des
 - Serviços de tradução gratuitos podem impor limites, responder com erro ou alterar seus endpoints. A aplicação mantém um fallback e não bloqueia o restante da ficha.
 - A coleção e os favoritos ficam no armazenamento local do navegador. Há exportação e importação manual em JSON, com mesclagem dos dados; ainda não existe sincronização automática entre dispositivos. Limpar os dados do site sem um backup pode apagá-los.
 - Os alertas de lançamento, perfis, avaliações sociais e compartilhamento de coleções do Stash dependem de serviços adicionais e não foram copiados para esta aplicação estática.
-- O arquivo catalogo-psplus.json permanece sem dados regionais verificados; esta revisão não altera a situação da seção PS Plus.
+- O arquivo catalogo-psplus.json contém um recorte regional de 24 registros PS5 consultados em 18/11/2026; não é uma lista completa nem se atualiza automaticamente.
 
 
 ## Reorganização da biblioteca — 19/11/2026
