@@ -75,3 +75,13 @@ A navegação por teclado e os estados de foco foram melhorados. Ainda seria des
 2. Em Ajustes, testar e salvar a chave RAWG nesse navegador.
 3. Pesquisar um jogo, abrir detalhes, conferir capturas e favoritar/desfavoritar.
 4. Depois, trabalhar na fonte do catálogo Plus Brasil e, se o projeto for distribuído, migrar a RAWG para um proxy de API protegido.
+
+
+## Adendo — galeria de imagens in-game (19/11/2026)
+
+- A ficha dos títulos da biblioteca PS5 procura uma correspondência na RAWG usando o nome normalizado e o filtro de plataforma PS5.
+- Quando encontra uma correspondência confiável, consulta o endpoint de capturas do jogo e mostra até 12 imagens in-game, com abertura em tamanho maior.
+- A aplicação mantém as imagens em cache de memória durante a sessão para reduzir chamadas repetidas.
+- Se não houver chave configurada, correspondência confiável ou capturas, a ficha mostra uma mensagem explicativa. Não substitui imagens de gameplay por capas.
+- A galeria inclui link de atribuição à RAWG.
+- A pesquisa e as capturas dependem da chave configurada no navegador e da disponibilidade dos dados na RAWG; títulos pouco conhecidos podem não ter capturas.
