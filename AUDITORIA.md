@@ -34,7 +34,7 @@ Inspeção do HTML, CSS, JavaScript, manifesto PWA, service worker, arquivo de c
 | Detalhes RAWG | Implementado | Exige chave configurada no navegador |
 | Recomendações | Parcial | Usa plataforma, gênero e avaliações disponíveis |
 | Favoritos | Funcional localmente | Não sincroniza entre aparelhos |
-| PS Plus Brasil | Pendente | Arquivo vazio; sem API oficial sincronizada |
+| PS Plus Brasil | Parcial | Recorte regional de 24 registros recentes; sem integração automática e sem catálogo completo |
 | PWA | Configurada | Shell pode ficar em cache; catálogo e dados externos exigem internet |
 | Segurança de chave | Adequada para teste local | Não há segredo embutido no repositório; chave no navegador não é segredo de servidor |
 
@@ -44,7 +44,7 @@ Inspeção do HTML, CSS, JavaScript, manifesto PWA, service worker, arquivo de c
 O site é estático e público. A chave não está no GitHub, mas, quando cadastrada, fica no armazenamento local do navegador e é enviada nas requisições à RAWG. Uma pessoa com acesso ao aparelho e às ferramentas de desenvolvedor pode visualizá-la. Isso é aceitável para teste pessoal, mas não é uma arquitetura segura para distribuir uma chave compartilhada a todos os visitantes. Para produção multiusuário, será necessário um proxy/backend com segredo configurado no servidor, limites de uso e monitoramento.
 
 ### 2. Catálogo PlayStation Plus
-Não existe integração oficial automática implementada. O arquivo `catalogo-psplus.json` está vazio. A seção não inventa resultados e direciona à fonte oficial. A próxima etapa requer uma fonte de dados confiável, região Brasil, data de verificação e processo de atualização.
+Não existe integração oficial automática implementada. O arquivo `catalogo-psplus.json` contém um recorte de 24 registros PS5 consultados na primeira página da listagem regional PSNDeals em 18/11/2026, cruzados com o anúncio oficial brasileiro de novembro. Não representa o catálogo inteiro e não se atualiza automaticamente. A próxima etapa requer uma fonte de dados confiável, região Brasil, data de verificação e processo de atualização.
 
 ### 3. Fonte da biblioteca PS5
 A lista vem de uma base comunitária, não oficial. Pode conter atrasos, duplicidades ou registros sem disponibilidade comercial brasileira. A loja brasileira deve ser usada para confirmar edição, preço e disponibilidade.
@@ -116,3 +116,27 @@ A navegação por teclado e os estados de foco foram melhorados. Ainda seria des
 - A coleção e os favoritos ficam no armazenamento local do navegador. Há exportação e importação manual em JSON, com mesclagem dos dados; ainda não existe sincronização automática entre dispositivos. Limpar os dados do site sem um backup pode apagá-los.
 - Os alertas de lançamento, perfis, avaliações sociais e compartilhamento de coleções do Stash dependem de serviços adicionais e não foram copiados para esta aplicação estática.
 - O arquivo catalogo-psplus.json permanece sem dados regionais verificados; esta revisão não altera a situação da seção PS Plus.
+
+
+## Reorganização da biblioteca — 19/11/2026
+
+### Navegação e busca
+- Navegação principal reduzida a duas abas: Recomendar e Todos os jogos. Ajustes ficam no cabeçalho; Minha coleção foi movida para um painel recolhível na biblioteca.
+- A biblioteca carrega os 27 arquivos do catálogo comunitário por lotes de quatro, deduplica os registros por UUID/URL/nome e permite selecionar uma letra ou pesquisar em tempo real.
+- O campo de busca é atualizado automaticamente enquanto o usuário digita e preenche sugestões locais com os nomes encontrados na seleção atual.
+- Filtros adicionados: nativo PS5 / PS4 + PS5, recorte PS Plus Deluxe e avaliação mínima RAWG. Ordenação: A–Z, Z–A, maior nota e menor nota.
+- A referência de metadados da fonte comunitária indicava 10.439 registros em 17/11/2026. A lista não é uma base oficial da Sony e pode conter alterações, edições ou disponibilidade regional diferentes.
+
+### Avaliações e PS Plus
+- A nota RAWG é obtida sob demanda a partir de quatro páginas (até 160 resultados) de jogos PS5 ordenados por avaliação e armazenada localmente por sete dias. A classificação cobre somente os títulos que a RAWG retorna e cujo nome pode ser associado com segurança; os demais ficam sem nota.
+- O filtro PS Plus usa 24 registros PS5 da primeira página regional PSNDeals consultada em 18/11/2026, combinados com as adições brasileiras anunciadas oficialmente pela Sony em novembro. A seleção distingue Extra (também incluído no Deluxe), Clássicos Deluxe e Testes Deluxe.
+- Limitação: os 24 registros não representam os 596 resultados apontados pela listagem completa do PSNDeals, portanto o filtro Deluxe ainda não é exaustivo. A disponibilidade deve ser confirmada no console e na página da PlayStation Store.
+- A avaliação de catálogo não foi chamada nesta revisão com a chave pessoal do usuário, pois ela permanece no armazenamento local do aparelho. A correspondência real e o tempo de carregamento precisam de conferência no telefone.
+
+### Testes estáticos
+- Sintaxe JavaScript e service worker: válida.
+- Manifesto e JSON PS Plus: parse válidos.
+- Funções: sem duplicidades; referências estáticas do DOM resolvidas.
+- Interface: duas abas principais e painel de coleção dentro da biblioteca.
+- Matching local testado com amostras: Hell Let Loose e Freedom Wars Remastered são reconhecidos no filtro; jogos não cadastrados não aparecem como incluídos na PS Plus.
+- O comportamento visual no Android e as chamadas reais à RAWG e aos 27 arquivos externos não foram executados end-to-end nesta sessão.
