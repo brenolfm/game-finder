@@ -37,7 +37,7 @@
 <div id="results" class="grid" style="margin-top:13px"></div>
 <div class="row" style="justify-content:space-between;margin-top:14px"><button class="btn" id="prev" onclick="page(-1)" disabled>← Anterior</button><span id="pageInfo" class="muted">Página 1</span><button class="btn" id="next" onclick="page(1)" disabled>Próxima →</button></div>
 <p class="muted" style="font-size:11px;margin-top:12px">Capas e links pertencem aos respectivos titulares. A disponibilidade regional deve ser conferida na PlayStation Store Brasil.</p>
-</div></section></section>
+</div></section>
 <section class="view" id="plus"><div class="panel"><h2>PlayStation Plus — Brasil</h2><p class="sub">Extra e Deluxe, com separação de clássicos e avaliações.</p><div class="notice">O catálogo oficial muda por região e ao longo do tempo. Só exibiremos como disponível o que estiver confirmado na lista do projeto. A sincronização automática oficial ainda não está conectada.</div><div class="controls"><input id="psSearch" placeholder="Buscar na lista..." oninput="renderPlus()"><select id="psTier" onchange="renderPlus()"><option value="">Extra + Deluxe</option><option value="extra">Catálogo Extra</option><option value="classics">Clássicos · Deluxe</option><option value="trial">Avaliações · Deluxe</option></select><select id="psPlatform" onchange="renderPlus()"><option value="">PS4 e PS5</option><option>PS5</option><option>PS4</option></select></div><div id="plusList" class="grid"></div><div class="info"><a href="https://www.playstation.com/pt-br/ps-plus/games/" target="_blank" rel="noopener">Consultar catálogo oficial PlayStation ↗</a></div></div></section>
 <section class="view" id="saved"><div class="panel"><h2>Meus favoritos</h2><p class="sub">Seus jogos guardados ficam salvos neste aparelho.</p><div class="grid" id="favorites"></div></div></section>
 <section class="view" id="settings"><div class="panel">
@@ -55,7 +55,7 @@
 <h3>Catálogo PlayStation Plus</h3>
 <p class="sub">A disponibilidade brasileira do Extra e Deluxe precisa ser confirmada separadamente. Não vamos marcar jogos como incluídos sem uma fonte regional verificável.</p>
 <a class="btn" href="https://www.playstation.com/pt-br/ps-plus/games/" target="_blank" rel="noopener">Consultar catálogo oficial PS Plus ↗</a>
-</div></section></section>
+</div></section>
 <footer class="foot">GAME FINDER · Projeto independente. Lista básica PS5: <a href="https://github.com/Ephellon/game-store-catalog" target="_blank" rel="noopener">Game Store Catalog</a> (fonte comunitária). Dados adicionais: <a href="https://rawg.io/" target="_blank" rel="noopener">RAWG</a> quando conectada. Não afiliado à Sony.</footer>
 </div>
 <div class="modal" id="modal" onclick="if(event.target===this)closeDetail()"><div class="dialog"><div class="dialoghead"><b>FICHA DO JOGO</b><button class="btn small" onclick="closeDetail()">Fechar ×</button></div><div id="detail" class="detail"></div></div></div>
