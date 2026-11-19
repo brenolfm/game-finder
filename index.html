@@ -20,6 +20,12 @@
   </header>
 
   <main>
+    <nav class="nav" aria-label="Navegação principal">
+      <button class="active" data-v="discover" type="button" onclick="go('discover')" aria-current="page"><span class="nav-icon">✦</span><span>Recomendar</span></button>
+      <button data-v="library" type="button" onclick="go('library')"><span class="nav-icon">▦</span><span>Todos os jogos</span></button>
+    </nav>
+
+    <section class="view active" id="discover">
     <section class="hero">
       <div class="eyebrow">PLAYSTATION DISCOVERY</div>
       <h1>Seu próximo jogo<br><span>começa aqui.</span></h1>
@@ -30,12 +36,6 @@
       </div>
     </section>
 
-    <nav class="nav" aria-label="Navegação principal">
-      <button class="active" data-v="discover" type="button" onclick="go('discover')" aria-current="page"><span class="nav-icon">✦</span><span>Recomendar</span></button>
-      <button data-v="library" type="button" onclick="go('library')"><span class="nav-icon">▦</span><span>Todos os jogos</span></button>
-    </nav>
-
-    <section class="view active" id="discover">
       <div class="section-heading"><div><span class="eyebrow">RECOMENDAÇÃO</span><h2>O que você quer jogar?</h2><p class="sub">Escolha um gênero ou deixe a seleção surpreender você.</p></div></div>
       <div class="panel">
         <div id="questions"></div>
