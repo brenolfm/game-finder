@@ -140,3 +140,12 @@ A navegação por teclado e os estados de foco foram melhorados. Ainda seria des
 - Interface: duas abas principais e painel de coleção dentro da biblioteca.
 - Matching local testado com amostras: Hell Let Loose e Freedom Wars Remastered são reconhecidos no filtro; jogos não cadastrados não aparecem como incluídos na PS Plus.
 - O comportamento visual no Android e as chamadas reais à RAWG e aos 27 arquivos externos não foram executados end-to-end nesta sessão.
+
+
+## Ajustes finais da reorganização — 19/11/2026
+
+- A aba Recomendar mostra uma indicação principal por vez e permite avançar para outra sugestão sem refazer o questionário.
+- A ordenação por menor nota consulta resultados RAWG em ordem ascendente, não apenas a inversão dos títulos mais bem avaliados.
+- As correspondências entre nomes do catálogo e notas RAWG ficam em cache de memória por modo de ordenação, evitando recalcular a mesma comparação em cada passo do sort.
+- Os cards da biblioteca mostram rótulos explícitos: Extra + Deluxe, Clássico Deluxe ou Teste Deluxe.
+- O cache do shell PWA foi atualizado para v12 após as mudanças na interface e no aplicativo.
