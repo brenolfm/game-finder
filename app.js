@@ -349,14 +349,16 @@ async function detailGame(id){
  const token=++detailToken;activeStoreGame=null;
  $('modal').classList.add('open');$('detail').innerHTML='<div class="empty">Carregando ficha e capturas…</div>';
  try{
-  const [g,shotData]=await Promise.all([
-   api('/games/'+id,{}),
-   api('/games/'+id+'/screenshots',{page_size:8}).catch(()=>({results:[]}))
+  const [g,shots]=await Promise.all([
+   rawgDetailsCache[id]?Promise.resolve(rawgDetailsCache[id]):api('/games/'+id,{}).then(data=>(rawgDetailsCache[id]=data)),
+   rawgScreenshotCache[id]?Promise.resolve(rawgScreenshotCache[id]):api('/games/'+id+'/screenshots',{page_size:8}).then(data=>{
+    const images=(data.results||[]).map(x=>safeImage(x.image)).filter(Boolean);rawgScreenshotCache[id]=images;return images;
+   }).catch(()=>[])
   ]);
   if(token!==detailToken)return;
   activeGame=g;
-  const shots=shotData.results||[],website=safeLink(g.website),favorite=read(FAV).some(x=>String(x.id)===String(g.id));
-  const shotHtml=shots.map(x=>{const img=safeImage(x.image);return img?'<a target="_blank" rel="noopener" href="'+esc(img)+'"><img src="'+esc(img)+'" alt="Captura de '+esc(g.name)+'" loading="lazy"></a>':''}).join('');
+  const website=safeLink(g.website),favorite=read(FAV).some(x=>String(x.id)===String(g.id));
+  const shotHtml=shots.map((img,index)=>img?'<a target="_blank" rel="noopener" href="'+esc(img)+'"><img src="'+esc(img)+'" alt="Captura '+(index+1)+' de '+esc(g.name)+'" loading="lazy"></a>':'').join('');
   $('detail').innerHTML='<h2>'+esc(g.name)+'</h2><div class="chips"><span class="chip">★ '+(g.rating||'—')+'</span><span class="chip">Metacritic '+(g.metacritic||'—')+'</span><span class="chip">'+esc(g.released||'Data não informada')+'</span></div><h3 class="section-subtitle">Sinopse</h3><div id="gameSynopsis" aria-live="polite"><div class="empty">Preparando sinopse em português…</div></div>'+collectionControlsHTML(g.id)+'<p class="muted">Gêneros: '+esc((g.genres||[]).map(x=>x.name).join(', ')||'Não informado')+'</p><p class="muted">Plataformas: '+esc((g.platforms||[]).map(x=>x.platform.name).join(', ')||'Não informado')+'</p><div class="row"><button class="btn primary" id="detailFavorite" onclick="toggleFav(activeGame)">'+(favorite?'♥ Salvo nos favoritos':'♡ Salvar nos favoritos')+'</button>'+(website?'<a class="btn" href="'+esc(website)+'" target="_blank" rel="noopener">Site oficial ↗</a>':'')+'</div><h3 class="section-subtitle">Imagens do jogo</h3><div class="screens">'+(shotHtml||'<p class="muted">Nenhuma captura disponível.</p>')+'</div><p class="fineprint muted">Detalhes e imagens fornecidos pela RAWG. Confira a loja e a edição antes de comprar.</p>';
   loadTranslatedSynopsis(g,'gameSynopsis',token);
  }catch(e){if(token===detailToken)$('detail').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}
