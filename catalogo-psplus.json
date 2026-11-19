@@ -1,1 +1,224 @@
-[]
+{
+  "checked_at": "2026-11-18",
+  "region": "BR",
+  "source": "PSNDeals Brasil + PlayStation Blog Brasil",
+  "scope": "Registros PS5 verificados na primeira página da listagem de 18/11/2026; não representa o catálogo completo.",
+  "items": [
+    {
+      "name": "Hell Let Loose",
+      "platform": "PS5",
+      "tier": "extra",
+      "category": "Catálogo Extra e Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://blog.br.playstation.com/2026/11/10/novidades-de-novembro-para-o-catalogo-de-jogos-playstation-plus-death-stranding-2-on-the-beach-like-a-dragon-pirate-yakuza-in-hawaii-atomfall-dragon-quest-iii-hd-2d-remake-e-muito-mais/"
+    },
+    {
+      "name": "Trepang2",
+      "platform": "PS5",
+      "tier": "extra",
+      "category": "Catálogo Extra e Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://blog.br.playstation.com/2026/11/10/novidades-de-novembro-para-o-catalogo-de-jogos-playstation-plus-death-stranding-2-on-the-beach-like-a-dragon-pirate-yakuza-in-hawaii-atomfall-dragon-quest-iii-hd-2d-remake-e-muito-mais/"
+    },
+    {
+      "name": "The Talos Principle 2",
+      "platform": "PS5",
+      "tier": "deluxe_trial",
+      "category": "Avaliação de jogo · Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://psndeals.com/store-br/playstation-plus-games/ps5/"
+    },
+    {
+      "name": "Dragon Quest III HD-2D Remake",
+      "platform": "PS5",
+      "tier": "extra",
+      "category": "Catálogo Extra e Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://blog.br.playstation.com/2026/11/10/novidades-de-novembro-para-o-catalogo-de-jogos-playstation-plus-death-stranding-2-on-the-beach-like-a-dragon-pirate-yakuza-in-hawaii-atomfall-dragon-quest-iii-hd-2d-remake-e-muito-mais/"
+    },
+    {
+      "name": "FREEDOM WARS Remastered",
+      "platform": "PS4 + PS5",
+      "tier": "deluxe",
+      "category": "Clássico · Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://blog.br.playstation.com/2026/11/10/novidades-de-novembro-para-o-catalogo-de-jogos-playstation-plus-death-stranding-2-on-the-beach-like-a-dragon-pirate-yakuza-in-hawaii-atomfall-dragon-quest-iii-hd-2d-remake-e-muito-mais/"
+    },
+    {
+      "name": "Like a Dragon: Pirate Yakuza in Hawaii",
+      "platform": "PS4 + PS5",
+      "tier": "extra",
+      "category": "Catálogo Extra e Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://blog.br.playstation.com/2026/11/10/novidades-de-novembro-para-o-catalogo-de-jogos-playstation-plus-death-stranding-2-on-the-beach-like-a-dragon-pirate-yakuza-in-hawaii-atomfall-dragon-quest-iii-hd-2d-remake-e-muito-mais/"
+    },
+    {
+      "name": "Atomfall",
+      "platform": "PS4 + PS5",
+      "tier": "extra",
+      "category": "Catálogo Extra e Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://blog.br.playstation.com/2026/11/10/novidades-de-novembro-para-o-catalogo-de-jogos-playstation-plus-death-stranding-2-on-the-beach-like-a-dragon-pirate-yakuza-in-hawaii-atomfall-dragon-quest-iii-hd-2d-remake-e-muito-mais/"
+    },
+    {
+      "name": "DEATH STRANDING 2: ON THE BEACH",
+      "platform": "PS5",
+      "tier": "extra",
+      "category": "Catálogo Extra e Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://blog.br.playstation.com/2026/11/10/novidades-de-novembro-para-o-catalogo-de-jogos-playstation-plus-death-stranding-2-on-the-beach-like-a-dragon-pirate-yakuza-in-hawaii-atomfall-dragon-quest-iii-hd-2d-remake-e-muito-mais/"
+    },
+    {
+      "name": "Cricket 26 – The Official Game of the Ashes",
+      "platform": "PS4 + PS5",
+      "tier": "extra",
+      "category": "Catálogo Extra e Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://blog.br.playstation.com/2026/11/10/novidades-de-novembro-para-o-catalogo-de-jogos-playstation-plus-death-stranding-2-on-the-beach-like-a-dragon-pirate-yakuza-in-hawaii-atomfall-dragon-quest-iii-hd-2d-remake-e-muito-mais/"
+    },
+    {
+      "name": "MotoGP 26",
+      "platform": "PS5",
+      "tier": "extra",
+      "category": "Catálogo Extra e Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://blog.br.playstation.com/2026/11/10/novidades-de-novembro-para-o-catalogo-de-jogos-playstation-plus-death-stranding-2-on-the-beach-like-a-dragon-pirate-yakuza-in-hawaii-atomfall-dragon-quest-iii-hd-2d-remake-e-muito-mais/"
+    },
+    {
+      "name": "Soul Reaver 2",
+      "platform": "PS4 + PS5",
+      "tier": "deluxe",
+      "category": "Clássico · Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://blog.br.playstation.com/2026/11/10/novidades-de-novembro-para-o-catalogo-de-jogos-playstation-plus-death-stranding-2-on-the-beach-like-a-dragon-pirate-yakuza-in-hawaii-atomfall-dragon-quest-iii-hd-2d-remake-e-muito-mais/"
+    },
+    {
+      "name": "Moonlight Peaks",
+      "platform": "PS5",
+      "tier": "deluxe_trial",
+      "category": "Avaliação de jogo · Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://psndeals.com/store-br/playstation-plus-games/ps5/"
+    },
+    {
+      "name": "CONTROL Resonant",
+      "platform": "PS5",
+      "tier": "deluxe_trial",
+      "category": "Avaliação de jogo · Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://psndeals.com/store-br/playstation-plus-games/ps5/"
+    },
+    {
+      "name": "An Eggcelent Sorting Game",
+      "platform": "PS5",
+      "tier": "deluxe_trial",
+      "category": "Avaliação de jogo · Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://psndeals.com/store-br/playstation-plus-games/ps5/"
+    },
+    {
+      "name": "Escape Academy 2: Back 2 School",
+      "platform": "PS5",
+      "tier": "deluxe_trial",
+      "category": "Avaliação de jogo · Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://psndeals.com/store-br/playstation-plus-games/ps5/"
+    },
+    {
+      "name": "The Slormancer",
+      "platform": "PS5",
+      "tier": "deluxe_trial",
+      "category": "Avaliação de jogo · Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://psndeals.com/store-br/playstation-plus-games/ps5/"
+    },
+    {
+      "name": "VOID/BREAKER",
+      "platform": "PS5",
+      "tier": "deluxe_trial",
+      "category": "Avaliação de jogo · Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://psndeals.com/store-br/playstation-plus-games/ps5/"
+    },
+    {
+      "name": "007 First Light",
+      "platform": "PS5",
+      "tier": "deluxe_trial",
+      "category": "Avaliação de jogo · Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://psndeals.com/store-br/playstation-plus-games/ps5/"
+    },
+    {
+      "name": "METRO 2033 Redux",
+      "platform": "PS4 + PS5",
+      "tier": "deluxe",
+      "category": "Clássico · Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://blog.br.playstation.com/2026/11/10/novidades-de-novembro-para-o-catalogo-de-jogos-playstation-plus-death-stranding-2-on-the-beach-like-a-dragon-pirate-yakuza-in-hawaii-atomfall-dragon-quest-iii-hd-2d-remake-e-muito-mais/"
+    },
+    {
+      "name": "METRO Last Light Redux",
+      "platform": "PS4 + PS5",
+      "tier": "deluxe",
+      "category": "Clássico · Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://blog.br.playstation.com/2026/11/10/novidades-de-novembro-para-o-catalogo-de-jogos-playstation-plus-death-stranding-2-on-the-beach-like-a-dragon-pirate-yakuza-in-hawaii-atomfall-dragon-quest-iii-hd-2d-remake-e-muito-mais/"
+    },
+    {
+      "name": "METRO Redux",
+      "platform": "PS4 + PS5",
+      "tier": "deluxe",
+      "category": "Clássico · Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://blog.br.playstation.com/2026/11/10/novidades-de-novembro-para-o-catalogo-de-jogos-playstation-plus-death-stranding-2-on-the-beach-like-a-dragon-pirate-yakuza-in-hawaii-atomfall-dragon-quest-iii-hd-2d-remake-e-muito-mais/"
+    },
+    {
+      "name": "Crimson Desert Enhanced",
+      "platform": "PS5",
+      "tier": "deluxe_trial",
+      "category": "Avaliação de jogo · Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://psndeals.com/store-br/playstation-plus-games/ps5/"
+    },
+    {
+      "name": "Back to the Dawn",
+      "platform": "PS5",
+      "tier": "deluxe_trial",
+      "category": "Avaliação de jogo · Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://psndeals.com/store-br/playstation-plus-games/ps5/"
+    },
+    {
+      "name": "Pocket Mirror ~ GoldenerTraum",
+      "platform": "PS4 + PS5",
+      "tier": "deluxe_trial",
+      "category": "Avaliação de jogo · Deluxe",
+      "available_with_deluxe": true,
+      "checked_at": "2026-11-18",
+      "source": "https://psndeals.com/store-br/playstation-plus-games/ps5/"
+    }
+  ]
+}
