@@ -6,16 +6,22 @@ Aplicativo web instalável (PWA) para descobrir jogos de PS5, explorar o catálo
 
 O GitHub Actions publica automaticamente a pasta raiz no GitHub Pages a cada atualização na branch `main`.
 
-URL do aplicativo: https://brenolfm.github.io/game-finder/
+URL: https://brenolfm.github.io/game-finder/
 
-## Como atualizar
+## Biblioteca PS5
 
-Faça alterações nos arquivos do repositório e envie para a branch `main`. O workflow **Publicar GAME FINDER no GitHub Pages** fará a publicação automaticamente.
+A biblioteca geral consulta, por letra, o projeto comunitário [Ephellon/game-store-catalog](https://github.com/Ephellon/game-store-catalog), que publica listas extraídas das lojas digitais. A base consultada informa 10.439 títulos PS5 e data de atualização 17/11/2026. A fonte declara que os dados podem não ser atualizados regularmente; por isso, a presença de um jogo na lista não garante disponibilidade ou preço no Brasil. Sempre confirme na PlayStation Store Brasil.
 
-## Dados e privacidade
+## Fontes adicionais
 
-- A chave RAWG, quando configurada, fica somente no armazenamento local do navegador. Não colocar chaves no repositório.
-- A lista do catálogo PS Plus fica em `catalogo-psplus.json` e deve conter somente títulos verificados para a região Brasil.
-- O service worker guarda a estrutura básica do aplicativo para abrir a interface mesmo sem conexão. Consultas e imagens externas exigem internet.
+- RAWG é opcional. A chave pessoal, se configurada pelo usuário, fica somente no armazenamento local do navegador e não deve ser commitada no GitHub.
+- A RAWG exige atribuição e uma chave pessoal própria para cada usuário/projeto. A biblioteca básica de PS5 não depende dela.
+- O catálogo PlayStation Plus deve conter apenas títulos verificados para a região Brasil. A lista `catalogo-psplus.json` ainda não é uma sincronização oficial automática.
 
-O GAME FINDER é um projeto independente, sem afiliação à Sony. Dados de jogos são fornecidos pela RAWG quando conectada.
+## Atualizações e cache
+
+As alterações em `main` são publicadas automaticamente pelo GitHub Actions. O service worker guarda a estrutura básica do app; catálogo, imagens e consultas externas exigem conexão com a internet.
+
+## Privacidade e afiliação
+
+Favoritos e chave RAWG ficam armazenados localmente no aparelho. O GAME FINDER é um projeto independente e não é afiliado à Sony Interactive Entertainment.
