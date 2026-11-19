@@ -70,6 +70,7 @@ Ao abrir um título listado na biblioteca ou nos destaques, o aplicativo usa o n
 - A tradução é feita sob demanda por serviços externos sem chave própria; há um provedor alternativo. Esses serviços podem impor limites, mudar ou ficar indisponíveis. O GAME FINDER mantém a navegação e os demais dados mesmo quando a tradução falha.
 - Traduções recentes ficam em cache local (até 24 sinopses) para reduzir chamadas repetidas. Uma descrição muito extensa pode ser limitada a um trecho para manter a ficha rápida.
 - A tela **Minha biblioteca** permite classificar jogos como **Quero jogar**, **Jogando**, **Zerado** e **Arquivado**, além de continuar usando os favoritos. Esses dados ficam no navegador e não são enviados a um servidor.
+- A coleção pode ser exportada para um arquivo JSON e importada em outro aparelho. A importação mescla os jogos com os dados existentes; a chave RAWG não entra no backup.
 - O service worker passou a guardar os arquivos JSON das letras do catálogo PS5 já consultadas. Isso permite reabrir essas partes da biblioteca quando estiver sem internet; letras ainda não visitadas continuam dependendo da primeira conexão.
 
 ## Otimizações e limites desta versão
