@@ -1,4 +1,4 @@
-const CACHE='game-finder-shell-v10';
+const CACHE='game-finder-shell-v11';
 const DATA_CACHE='game-finder-data-v1';
 const SHELL=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./icon.svg','./catalogo-psplus.json','./destaques.json'];
 function isCatalogData(url){
