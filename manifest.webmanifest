@@ -1,0 +1,15 @@
+{
+  "id": "./",
+  "name": "GAME FINDER — Descubra seu próximo jogo",
+  "short_name": "GAME FINDER",
+  "description": "Descubra jogos de PS5 e explore a PlayStation Plus.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#080d18",
+  "theme_color": "#080d18",
+  "categories": ["games", "entertainment"],
+  "icons": [{"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
