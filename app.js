@@ -260,9 +260,9 @@ async function loadCatalogScreenshots(item,token){
  try{
   const match=await findRawgGameForCatalog(item);
   if(token!==detailToken)return;
-  const [details,shots]=await Promise.all([
+  const [details,shotResult]=await Promise.all([
    rawgDetailsCache[match.id]?Promise.resolve(rawgDetailsCache[match.id]):api('/games/'+match.id,{}).catch(()=>null),
-   rawgScreenshotCache[match.id]?Promise.resolve(rawgScreenshotCache[match.id]):api('/games/'+match.id+'/screenshots',{page_size:12}).then(data=>(data.results||[]).map(x=>safeImage(x.image)).filter(Boolean)).catch(()=>[])
+   rawgScreenshotCache[match.id]?Promise.resolve({images:rawgScreenshotCache[match.id],error:false}):api('/games/'+match.id+'/screenshots',{page_size:12}).then(data=>({images:(data.results||[]).map(x=>safeImage(x.image)).filter(Boolean),error:false})).catch(()=>({images:[],error:true}))
   ]);
   if(token!==detailToken)return;
   if(details){
@@ -271,7 +271,12 @@ async function loadCatalogScreenshots(item,token){
   }else if(synopsisTarget){
    synopsisTarget.innerHTML='<div class="empty">Não foi possível carregar a sinopse pela RAWG neste momento.</div>';
   }
-  rawgScreenshotCache[match.id]=shots;
+  const shots=shotResult.images||[];
+  if(!shotResult.error)rawgScreenshotCache[match.id]=shots;
+  if(shotResult.error){
+   target.innerHTML='<div class="notice">Não foi possível carregar as capturas agora. Tente abrir o jogo novamente com a internet conectada.</div>';
+   return;
+  }
   if(!shots.length){
    target.innerHTML='<div class="empty">A RAWG encontrou "'+esc(match.name)+'", mas não há capturas cadastradas para este título.</div>';
    return;
