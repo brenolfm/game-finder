@@ -213,3 +213,11 @@ select{cursor:pointer}
  .catalog-filters select{font-size:11px;min-height:41px;padding:7px 8px}
  .collection-drawer>summary{padding:13px}
 }
+
+.recommendation-result{margin-top:17px;padding-top:15px;border-top:1px solid #2b3f58}
+.recommendation-result>.card{max-width:390px;margin:0 auto}
+.recommendation-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:13px 0 2px}
+@media(max-width:640px){
+ .recommendation-result>.card{max-width:340px}
+ .recommendation-actions .btn{flex:1}
+}
