@@ -1,5 +1,5 @@
 
-const KEY='gf_rawg_key',FAV='gf_favorites',PLUS='gf_plus';const CATALOG_BASE='https://raw.githubusercontent.com/Ephellon/game-store-catalog/main/ps5/';const PAGE_SIZE=24;let pageNo=1,maxPage=1,answers={},activeGame=null,installPrompt=null,catalogCache={},catalogMeta=null,catalogCurrent=[],catalogById={},activeStoreGame=null,plusCatalog=null,plusCatalogPromise=null;
+const KEY='gf_rawg_key',FAV='gf_favorites',PLUS='gf_plus';const CATALOG_BASE='https://raw.githubusercontent.com/Ephellon/game-store-catalog/main/ps5/';const PAGE_SIZE=24;let pageNo=1,maxPage=1,answers={},activeGame=null,installPrompt=null,catalogCache={},catalogMeta=null,catalogCurrent=[],catalogById={},activeStoreGame=null,plusCatalog=null,plusCatalogPromise=null,detailToken=0,rawgSearchCache={},rawgScreenshotCache={};
 const $=id=>document.getElementById(id),key=()=>localStorage.getItem(KEY)||'';
 function go(id){
  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===id));
@@ -48,12 +48,72 @@ function catalogCard(g){
  catalogById[id]=g;const image=safeImage(g.image);
  return '<article class="card" role="button" tabindex="0" onclick="showCatalogDetail(\''+id+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();showCatalogDetail(\''+id+'\')}"><div class="poster">'+(image?'<img class="cover" src="'+esc(image)+'" alt="Capa de '+esc(g.name)+'" loading="lazy">':'<span class="cover-fallback">PS5</span>')+'</div><div class="cardbody"><h3>'+esc(g.name)+'</h3><div class="chips"><span class="chip">PS5</span><span class="chip">PlayStation Store</span></div><p>Consulte edição e disponibilidade na loja brasileira.</p></div></article>';
 }
-function showCatalogDetail(id){
+function normalizeGameTitle(value){
+ return String(value||'').toLowerCase()
+  .replace(/\\b(ps4\\s*&\\s*ps5|ps5|ps4)\\b/gi,' ')
+  .replace(/\\b(digital\\s+deluxe|deluxe|ultimate|complete|director.?s\\s+cut|definitive|game\\s+of\\s+the\\s+year)\\s+edition\\b/gi,' ')
+  .normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')
+  .replace(/[^a-z0-9]+/g,' ').trim().replace(/\\s+/g,' ');
+}
+function rawgMatchScore(query,title){
+ const a=normalizeGameTitle(query),b=normalizeGameTitle(title);
+ if(!a||!b)return 0;
+ if(a===b)return 1;
+ if(a.length>6&&(b.includes(a)||a.includes(b)))return .88;
+ const aa=new Set(a.split(' ')),bb=new Set(b.split(' '));
+ const common=[...aa].filter(t=>bb.has(t));
+ const score=common.length/Math.max(aa.size,bb.size);
+ return score;
+}
+async function findRawgGameForCatalog(item){
+ const query=normalizeGameTitle(item.name);
+ if(!query)throw Error('Não foi possível identificar o nome do jogo.');
+ if(rawgSearchCache[query])return rawgSearchCache[query];
+ const response=await api('/games',{search:query,platforms:'187',page_size:12,ordering:'-rating'});
+ const results=Array.isArray(response.results)?response.results:[];
+ const ranked=results.map(game=>({game,score:rawgMatchScore(query,game.name)})).sort((a,b)=>b.score-a.score);
+ const best=ranked[0];
+ if(!best||best.score<.55)throw Error('A RAWG não encontrou uma correspondência confiável para este jogo. Ainda não há capturas disponíveis.');
+ rawgSearchCache[query]=best.game;
+ return best.game;
+}
+async function loadCatalogScreenshots(item,token){
+ const target=$('catalogScreenshots');if(!target)return;
+ if(!key()){
+  target.innerHTML='<div class="info">Para ver cenas reais do jogo, conecte sua chave RAWG em Ajustes. <button class="btn small primary" type="button" onclick="closeDetail();go(\'settings\')">Configurar RAWG</button></div>';
+  return;
+ }
+ target.innerHTML='<div class="empty">Buscando imagens de gameplay…</div>';
+ try{
+  const match=await findRawgGameForCatalog(item);
+  if(token!==detailToken)return;
+  let shots=rawgScreenshotCache[match.id];
+  if(!shots){
+   const data=await api('/games/'+match.id+'/screenshots',{page_size:12});
+   shots=(data.results||[]).map(x=>safeImage(x.image)).filter(Boolean);
+   rawgScreenshotCache[match.id]=shots;
+  }
+  if(token!==detailToken)return;
+  if(!shots.length){
+   target.innerHTML='<div class="empty">A RAWG encontrou "'+esc(match.name)+'", mas não há capturas cadastradas para este título.</div>';
+   return;
+  }
+  const gallery=shots.map((src,index)=>'<a class="game-shot" href="'+esc(src)+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(src)+'" alt="Cena '+(index+1)+' de '+esc(match.name)+'" loading="lazy"><span>Ver imagem</span></a>').join('');
+  const rawgLink='https://rawg.io/games/'+encodeURIComponent(match.slug||String(match.id));
+  target.innerHTML='<div class="gallery-meta"><span class="chip">'+shots.length+' capturas encontradas</span><span class="muted">Jogo identificado: '+esc(match.name)+'</span></div><div class="game-gallery">'+gallery+'</div><p class="fineprint muted">Imagens e dados adicionais: <a href="'+esc(rawgLink)+'" target="_blank" rel="noopener noreferrer">RAWG ↗</a>. As capturas são imagens do jogo, não fotos promocionais da capa.</p>';
+ }catch(error){
+  if(token!==detailToken)return;
+  target.innerHTML='<div class="notice">'+esc(error.message||'Não foi possível carregar as imagens de gameplay.')+'</div>';
+ }
+}
+async function showCatalogDetail(id){
  const g=catalogById[id];if(!g)return;activeStoreGame=g;
+ const token=++detailToken;
  const image=safeImage(g.image),href='https://store.playstation.com/pt-br/product/'+encodeURIComponent(g.uuid);
  const saved=read(FAV).some(x=>x.id==='psn:'+id);
  $('modal').classList.add('open');
- $('detail').innerHTML='<h2>'+esc(g.name)+'</h2>'+(image?'<img class="detail-cover" src="'+esc(image)+'" alt="Capa de '+esc(g.name)+'">':'')+'<div class="chips"><span class="chip">PlayStation 5</span><span class="chip">Catálogo geral</span></div><p>Este registro identifica um título listado para PS5 na base comunitária consultada. Confirme disponibilidade, edição e preço diretamente na loja brasileira.</p><div class="row"><button class="btn primary" onclick="toggleStoreFav()">'+(saved?'♥ Remover dos favoritos':'♡ Favoritar')+'</button><a class="btn" href="'+esc(href)+'" target="_blank" rel="noopener">Ver na PlayStation Store ↗</a></div><p class="muted fineprint">Fonte comunitária. A presença nesta lista não garante venda ou disponibilidade no Brasil.</p>';
+ $('detail').innerHTML='<h2>'+esc(g.name)+'</h2>'+(image?'<img class="detail-cover" src="'+esc(image)+'" alt="Capa de '+esc(g.name)+'">':'')+'<div class="chips"><span class="chip">PlayStation 5</span><span class="chip">Catálogo geral</span></div><p>Confira cenas reais do jogo abaixo, além da edição e disponibilidade na loja brasileira.</p><div class="row"><button class="btn primary" onclick="toggleStoreFav()">'+(saved?'♥ Remover dos favoritos':'♡ Favoritar')+'</button><a class="btn" href="'+esc(href)+'" target="_blank" rel="noopener">Ver na PlayStation Store ↗</a></div><h3 class="section-subtitle">Cenas do jogo · imagens in-game</h3><div id="catalogScreenshots" aria-live="polite"><div class="empty">Preparando galeria…</div></div><p class="muted fineprint">Título da biblioteca: fonte comunitária. As capturas adicionais são consultadas na RAWG.</p>';
+ loadCatalogScreenshots(g,token);
 }
 function toggleStoreFav(){if(!activeStoreGame)return;const id='psn:'+String(activeStoreGame.uuid||'');let arr=read(FAV);if(arr.some(x=>x.id===id))arr=arr.filter(x=>x.id!==id);else arr.push({id,name:activeStoreGame.name,background_image:activeStoreGame.image||'',storeURL:'https://store.playstation.com/pt-br/product/'+encodeURIComponent(activeStoreGame.uuid),source:'PS5'});localStorage.setItem(FAV,JSON.stringify(arr));showCatalogDetail(String(activeStoreGame.uuid).replace(/[^A-Za-z0-9_-]/g,''))}
 function favoriteCatalogCard(g){
