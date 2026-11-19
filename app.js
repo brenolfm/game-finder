@@ -270,7 +270,8 @@ function catalogCard(g){
  catalogById[id]=g;const image=safeImage(g.image),psPlus=plusItemForGame(g),rating=ratingForCatalogGame(g);
  const platformLabel=(g.platforms||[]).includes('PS4')?'PS4 + PS5':'PS5';
  const ratingChip=rating?'<span class="chip">★ '+rating.rating.toFixed(1)+' RAWG</span>':'';
- const plusChip=psPlus?'<span class="chip chip-plus">'+esc(psPlus.badge)+'</span>':'';
+ const plusLabel=psPlus?(psPlus.tier==='extra'?'Extra + Deluxe':psPlus.tier==='deluxe'?'Clássico Deluxe':'Teste Deluxe'):'';
+ const plusChip=psPlus?'<span class="chip chip-plus">'+esc(plusLabel)+'</span>':'';
  return '<article class="card" role="button" tabindex="0" onclick="showCatalogDetail(\''+id+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();showCatalogDetail(\''+id+'\')}"><div class="poster">'+(image?'<img class="cover" src="'+esc(image)+'" alt="Capa de '+esc(g.name)+'" loading="lazy">':'<span class="cover-fallback">PS5</span>')+'</div><div class="cardbody"><h3>'+esc(g.name)+'</h3><div class="chips"><span class="chip">'+platformLabel+'</span>'+ratingChip+plusChip+'</div><p>'+ (psPlus?esc(psPlus.category):'Consulte detalhes, capturas e disponibilidade na loja.')+'</p></div></article>';
 }
 function normalizeGameTitle(value){
