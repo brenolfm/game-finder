@@ -46,7 +46,7 @@ O service worker mantém em cache os arquivos principais da interface. A consult
 - A RAWG continua sendo chamada diretamente do navegador. Para proteger uma chave compartilhada da aplicação, será necessário um proxy/backend com segredo em variável de ambiente e controle de uso. Não é seguro embutir segredo em site estático público.
 - A chave da RAWG configurada no navegador não sincroniza entre aparelhos.
 - A biblioteca comunitária depende de uma fonte externa e internet; não é a lista oficial nem prova disponibilidade brasileira.
-- O catálogo Extra/Deluxe brasileiro precisa de uma fonte autorizada/confiável, estrutura de atualização e verificação periódica antes de ser apresentado como atualizado.
+- O aplicativo lê o arquivo `catalogo-psplus.json` para exibir uma lista estruturada (campos esperados: `name`, `platform`, `tier`, `checked_at`). O arquivo permanece vazio até que exista uma fonte brasileira confiável e cada título seja verificado. Não há sincronização oficial automática.
 - Favoritos são locais; não há backup, exportação ou sincronização.
 - A interface ainda depende de fontes e imagens externas. A instalação PWA não baixa toda a biblioteca para uso offline.
 - Recomenda-se validar visualmente em Android real e desktop, além de conferir a execução do GitHub Actions após a publicação.
