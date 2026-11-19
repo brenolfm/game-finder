@@ -61,7 +61,7 @@ function favoriteCatalogCard(g){
 }
 
 function showCards(id,arr){$(id).innerHTML=arr&&arr.length?arr.map(card).join(''):'<div class="empty">Nenhum jogo encontrado.</div>'}
-async async function loadCatalogMeta(){
+async function loadCatalogMeta(){
  if(catalogMeta)return catalogMeta;
  try{const r=await fetch(CATALOG_BASE+'$.json',{cache:'no-cache'});if(!r.ok)throw Error('metadados indisponíveis');catalogMeta=await r.json()}
  catch(e){catalogMeta={size:null,date:null}}
@@ -69,7 +69,7 @@ async async function loadCatalogMeta(){
 }
 async function loadCatalogLetter(letter){if(catalogCache[letter])return catalogCache[letter];const file=(letter==='_')?'_.json':letter+'.json';const r=await fetch(CATALOG_BASE+file,{cache:'no-cache'});if(!r.ok)throw Error('Não foi possível consultar a base externa ('+r.status+'). Tente novamente em instantes.');const data=await r.json();if(!Array.isArray(data))throw Error('A fonte retornou um formato inesperado.');catalogCache[letter]=data.filter(g=>g&&g.name&&Array.isArray(g.platforms)&&g.platforms.includes('PS5'));return catalogCache[letter]}
 function renderCatalogPage(){const arr=catalogCurrent.slice((pageNo-1)*PAGE_SIZE,pageNo*PAGE_SIZE);$('results').innerHTML=arr.length?arr.map(catalogCard).join(''):'<div class="empty">Nenhum jogo encontrado nesta letra. Confira a busca ou escolha outra letra.</div>';$('pageInfo').textContent='Página '+pageNo+' de '+maxPage;$('prev').disabled=pageNo<=1;$('next').disabled=pageNo>=maxPage}
-async async function searchGames(reset){
+async function searchGames(reset){
  if(reset)pageNo=1;
  const term=($('search').value||'').trim();let letter=$('letter').value||'a';
  if(term){const first=term.normalize('NFD').replace(/[\u0300-\u036f]/g,'').charAt(0).toLowerCase();letter=/[a-z]/.test(first)?first:'_';$('letter').value=letter}
@@ -89,7 +89,7 @@ async async function searchGames(reset){
 
 function page(n){pageNo=Math.max(1,Math.min(maxPage,pageNo+n));renderCatalogPage();window.scrollTo({top:0,behavior:'smooth'})}
 
-async async function detailGame(id){
+async function detailGame(id){
  $('modal').classList.add('open');$('detail').innerHTML='<div class="empty">Carregando ficha e capturas…</div>';
  try{
   const pair=await Promise.all([api('/games/'+id,{}),api('/games/'+id+'/screenshots',{page_size:8})]);
@@ -109,7 +109,7 @@ function buildQuestions(){
 }
 function pick(b){answers[b.dataset.q]=b.dataset.v;document.querySelectorAll('[data-q="'+b.dataset.q+'"]').forEach(x=>x.classList.toggle('selected',x===b))}
 function resetQ(){answers={};buildQuestions();$('recommendations').innerHTML=''}
-async async function recommend(){
+async function recommend(){
  if(!key()){
   $('recommendations').innerHTML='<div class="info">Para montar recomendações com dados da RAWG, conecte sua chave em Ajustes. A biblioteca geral continua disponível sem chave.</div><div class="row"><button class="btn primary" onclick="go(\'settings\')">Configurar RAWG</button><button class="btn" onclick="go(\'library\')">Explorar a biblioteca</button></div>';return;
  }
