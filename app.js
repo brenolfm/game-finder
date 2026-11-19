@@ -1,5 +1,5 @@
 
-const KEY='gf_rawg_key',FAV='gf_favorites',PLUS='gf_plus';const CATALOG_BASE='https://raw.githubusercontent.com/Ephellon/game-store-catalog/main/ps5/';const PAGE_SIZE=24;let pageNo=1,maxPage=1,answers={},activeGame=null,installPrompt=null,catalogCache={},catalogMeta=null,catalogCurrent=[],catalogById={},activeStoreGame=null,plusCatalog=null,plusCatalogPromise=null,detailToken=0,rawgSearchCache={},rawgScreenshotCache={};
+const KEY='gf_rawg_key',FAV='gf_favorites',PLUS='gf_plus',COLL='gf_collection',TRANS='gf_translations';const CATALOG_BASE='https://raw.githubusercontent.com/Ephellon/game-store-catalog/main/ps5/';const PAGE_SIZE=24;let pageNo=1,maxPage=1,answers={},activeGame=null,installPrompt=null,catalogCache={},catalogMeta=null,catalogCurrent=[],catalogById={},activeStoreGame=null,plusCatalog=null,plusCatalogPromise=null,detailToken=0,rawgSearchCache={},rawgScreenshotCache={},rawgDetailsCache={},collectionFilter='all';
 const $=id=>document.getElementById(id),key=()=>localStorage.getItem(KEY)||'';
 function go(id){
  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===id));
@@ -39,6 +39,175 @@ function safeImage(value){
  return /^https:\/\/(?:media\.rawg\.io|image\.api\.playstation\.com)\//i.test(raw)?raw:'';
 }
 function safeLink(value){try{const u=new URL(String(value||''));return ['https:','http:'].includes(u.protocol)?u.href:''}catch{return ''}}
+function plainDescription(value){
+ return String(value||'').replace(/<br\s*\/?>/gi,' ').replace(/<\/p\s*>/gi,' ').replace(/<[^>]*>/g,' ').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&').replace(/&quot;/gi,'"').replace(/&#39;|&apos;/gi,"'").replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/\s+/g,' ').trim();
+}
+function hashText(value){
+ let hash=2166136261;
+ for(let i=0;i<value.length;i++){hash^=value.charCodeAt(i);hash=Math.imul(hash,16777619)}
+ return (hash>>>0).toString(36);
+}
+function readObject(keyName){
+ try{const value=JSON.parse(localStorage.getItem(keyName)||'{}');return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}catch{return {}}
+}
+function saveTranslationCache(cacheKey,value){
+ try{
+  const cache=readObject(TRANS);cache[cacheKey]={...value,savedAt:Date.now()};
+  const entries=Object.entries(cache).sort((a,b)=>(b[1].savedAt||0)-(a[1].savedAt||0)).slice(0,24);
+  localStorage.setItem(TRANS,JSON.stringify(Object.fromEntries(entries)));
+ }catch(e){/* cache is optional; translation still appears in this session */}
+}
+function splitTranslationChunks(value,maxLength=430){
+ const chunks=[];let rest=value;
+ while(rest.length){
+  let cut=Math.min(maxLength,rest.length);
+  if(cut<rest.length){
+   const boundary=Math.max(rest.lastIndexOf('. ',cut),rest.lastIndexOf('! ',cut),rest.lastIndexOf('? ',cut),rest.lastIndexOf(' ',cut));
+   if(boundary>Math.floor(maxLength*.55))cut=boundary+1;
+  }
+  chunks.push(rest.slice(0,cut).trim());rest=rest.slice(cut).trim();
+ }
+ return chunks.filter(Boolean);
+}
+async function googleTranslate(text){
+ const url=new URL('https://translate.googleapis.com/translate_a/single');
+ url.searchParams.set('client','gtx');url.searchParams.set('sl','auto');url.searchParams.set('tl','pt');url.searchParams.set('dt','t');url.searchParams.set('q',text);
+ const response=await fetch(url,{headers:{Accept:'application/json'}});
+ if(!response.ok)throw Error('Serviço de tradução indisponível ('+response.status+').');
+ const data=await response.json();
+ const translated=Array.isArray(data)&&Array.isArray(data[0])?data[0].map(part=>part&&part[0]||'').join(''):'';
+ if(!translated.trim())throw Error('A tradução não retornou texto.');
+ return translated;
+}
+async function myMemoryTranslate(text){
+ const chunks=splitTranslationChunks(text,400),translated=[];
+ for(const chunk of chunks){
+  const url=new URL('https://api.mymemory.translated.net/get');
+  url.searchParams.set('q',chunk);url.searchParams.set('langpair','en|pt-BR');
+  const response=await fetch(url,{headers:{Accept:'application/json'}});
+  if(!response.ok)throw Error('O serviço alternativo de tradução não respondeu.');
+  const data=await response.json(),value=data&&data.responseData&&data.responseData.translatedText;
+  if(!value||String(value).toLowerCase().includes('quota exceeded'))throw Error('Limite diário do serviço alternativo atingido.');
+  translated.push(String(value).replace(/&#39;|&apos;/gi,"'").replace(/&quot;/gi,'"').replace(/&amp;/gi,'&'));
+ }
+ return translated.join(' ');
+}
+async function translateSynopsisText(text){
+ try{return await googleTranslate(text)}catch(primaryError){
+  try{return await myMemoryTranslate(text)}catch(secondaryError){
+   throw Error('Não foi possível traduzir agora. A tradução automática depende de serviços externos; a sinopse original continua disponível.');
+  }
+ }
+}
+function summarizeSynopsis(value){
+ const text=String(value||'').replace(/\s+/g,' ').trim();
+ if(text.length<=430)return text;
+ const stop=new Set('a ao aos as com como da das de do dos e ela ele em entre era essa esse esta este foi foram há isso mais mas na nas no nos o os ou para pela pelas pelo pelos por que se sem ser sua suas seu seus um uma uns umas você'.split(' '));
+ const sentences=(text.match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[]).map(x=>x.trim()).filter(x=>x.length>35);
+ if(!sentences.length)return text.slice(0,420).replace(/\s+\S*$/,'')+'…';
+ const frequency={};
+ text.toLowerCase().match(/[a-záàâãéêíóôõúç]{4,}/g)?.forEach(word=>{if(!stop.has(word))frequency[word]=(frequency[word]||0)+1});
+ const priority=['jogador','jogadores','mundo','aventura','história','missão','sobreviver','explorar','enfrentar','personagem','reino','guerra','mistério','descobrir','você','poderá','desafio'];
+ const ranked=sentences.map((sentence,index)=>{
+  const words=sentence.toLowerCase().match(/[a-záàâãéêíóôõúç]{4,}/g)||[];
+  let score=words.reduce((sum,word)=>sum+Math.min(frequency[word]||0,4),0)/Math.max(words.length,1);
+  score+=priority.reduce((sum,word)=>sum+(sentence.toLowerCase().includes(word)?1.5:0),0);
+  if(index===0)score+=2.5;
+  if(sentence.length>260)score-=2;
+  return {sentence,index,score};
+ }).sort((a,b)=>b.score-a.score);
+ const chosen=[];let length=0;
+ for(const item of ranked){
+  if(chosen.length>=3)break;
+  if(length+item.sentence.length+(chosen.length?1:0)>430)continue;
+  chosen.push(item);length+=item.sentence.length+1;
+ }
+ let summary=chosen.sort((a,b)=>a.index-b.index).map(x=>x.sentence).join(' ');
+ if(summary.length<150){
+  summary=text.slice(0,420).replace(/\s+\S*$/,'')+'…';
+ }
+ return summary;
+}
+function synopsisMarkup(summary,translated,original,wasTrimmed,translatedOK){
+ if(!translatedOK){
+  return '<div class="synopsis-card"><div class="synopsis-heading"><b>PRÉVIA DA SINOPSE</b><span class="chip">Original</span></div><p class="synopsis-summary">'+esc(summary)+'</p><div class="notice">A tradução automática não respondeu desta vez. Você ainda pode ler a descrição original abaixo.</div><details class="synopsis-details"><summary>Ver descrição original</summary><p>'+esc(original)+'</p></details></div>';
+ }
+ return '<div class="synopsis-card"><div class="synopsis-heading"><b>RESUMO DO JOGO</b><span class="chip">Português · tradução automática</span></div><p class="synopsis-summary">'+esc(summary)+'</p><details class="synopsis-details"><summary>Ver descrição completa traduzida</summary><p>'+esc(translated)+'</p>'+(wasTrimmed?'<p class="fineprint muted">A descrição original era maior; foi traduzido um trecho para manter a ficha rápida.</p>':'')+'</details><details class="synopsis-details"><summary>Ver texto original</summary><p>'+esc(original)+'</p></details><p class="fineprint muted">Tradução automática. Pequenos erros de termos e nomes próprios podem ocorrer.</p></div>';
+}
+async function loadTranslatedSynopsis(game,targetId,token){
+ const target=$(targetId);if(!target)return;
+ const original=plainDescription(game&& (game.description_raw||game.description));
+ if(!original){target.innerHTML='<div class="empty">A RAWG não possui uma sinopse para este jogo.</div>';return}
+ const source=original.slice(0,3200),cacheKey=String(game.id||game.slug||game.name)+':'+hashText(source);
+ const cache=readObject(TRANS),cached=cache[cacheKey];
+ if(cached&&cached.translated){
+  if(token===detailToken&&$(targetId))target.innerHTML=synopsisMarkup(cached.summary,cached.translated,original,original.length>source.length,true);
+  return;
+ }
+ target.innerHTML='<div class="synopsis-card"><div class="synopsis-heading"><b>RESUMO DO JOGO</b><span class="chip">Preparando em português…</span></div><p class="muted">Traduzindo e resumindo a sinopse automaticamente.</p></div>';
+ try{
+  const translated=await translateSynopsisText(source);
+  if(token!==detailToken||!$(targetId))return;
+  const summary=summarizeSynopsis(translated);
+  saveTranslationCache(cacheKey,{translated,summary});
+  $(targetId).innerHTML=synopsisMarkup(summary,translated,original,original.length>source.length,true);
+ }catch(error){
+  if(token!==detailToken||!$(targetId))return;
+  const fallback=summarizeSynopsis(original);
+  $(targetId).innerHTML=synopsisMarkup(fallback,'',original,original.length>source.length,false);
+ }
+}
+function collectionStatusFor(id){
+ const item=read(COLL).find(x=>String(x.id)===String(id));
+ return item&&item.status||'';
+}
+function collectionControlsHTML(id){
+ const current=collectionStatusFor(id);
+ const options=[['','Não está na coleção'],['want','Quero jogar'],['playing','Jogando'],['beaten','Zerado'],['archived','Arquivado']];
+ return '<div class="collection-box"><label for="collectionStatus">Minha lista</label><div class="collection-control"><select id="collectionStatus">'+options.map(([value,label])=>'<option value="'+value+'"'+(current===value?' selected':'')+'>'+label+'</option>').join('')+'</select><button class="btn small primary" type="button" onclick="saveActiveCollection()">Salvar</button></div><p id="collectionMessage" class="fineprint muted" aria-live="polite">Organize seu progresso neste aparelho.</p></div>';
+}
+function saveActiveCollection(){
+ const game=activeStoreGame||activeGame;
+ if(!game){return}
+ const isStore=!!activeStoreGame,id=isStore?'psn:'+String(game.uuid||''):String(game.id||'');
+ if(!id||id==='psn:')return;
+ const status=$('collectionStatus')&&$('collectionStatus').value||'';
+ let list=read(COLL).filter(item=>String(item.id)!==id);
+ if(status){
+  list.push({id,name:game.name||'Jogo sem título',background_image:isStore?(game.image||''):(game.background_image||''),status,platform:'PS5',storeURL:isStore?'https://store.playstation.com/pt-br/product/'+encodeURIComponent(game.uuid):'',source:isStore?'PS5':'RAWG',updatedAt:Date.now()});
+ }
+ try{localStorage.setItem(COLL,JSON.stringify(list))}catch(e){const msg=$('collectionMessage');if(msg)msg.textContent='O armazenamento deste navegador está cheio. Não foi possível salvar.';return}
+ const msg=$('collectionMessage');
+ if(msg)msg.textContent=status?'Adicionado à sua coleção: '+({want:'Quero jogar',playing:'Jogando',beaten:'Zerado',archived:'Arquivado'}[status])+'.':'Removido da sua coleção.';
+ renderFav();
+}
+function collectionCard(item){
+ const id=String(item.id||''),image=safeImage(item.background_image),label=({want:'Quero jogar',playing:'Jogando',beaten:'Zerado',archived:'Arquivado'}[item.status]||'Favorito');
+ const body='<div class="poster">'+(image?'<img class="cover" src="'+esc(image)+'" alt="Capa de '+esc(item.name)+'" loading="lazy">':'<span class="cover-fallback">PS5</span>')+'</div><div class="cardbody"><h3>'+esc(item.name)+'</h3><div class="chips"><span class="chip">'+esc(label)+'</span>'+(item.rating?'<span class="chip">★ '+Number(item.rating).toFixed(1)+'</span>':'')+'</div></div>';
+ if(id.startsWith('psn:')&&safeLink(item.storeURL))return '<a class="card card-link" href="'+esc(item.storeURL)+'" target="_blank" rel="noopener noreferrer">'+body+'</a>';
+ const numeric=Number(id);
+ if(Number.isFinite(numeric)&&numeric>0)return '<article class="card" role="button" tabindex="0" onclick="detailGame('+numeric+')" onkeydown="if(event.key===\'Enter\'){detailGame('+numeric+')}">'+body+'</article>';
+ return '<article class="card">'+body+'</article>';
+}
+function setCollectionFilter(filter){
+ collectionFilter=filter;renderFav();
+}
+function renderFav(){
+ const favorites=read(FAV),collection=read(COLL),map=new Map();
+ favorites.forEach(item=>map.set(String(item.id),{...item,isFavorite:true}));
+ collection.forEach(item=>map.set(String(item.id),{...(map.get(String(item.id))||{}),...item,isFavorite:!!(map.get(String(item.id))||{}).isFavorite}));
+ const all=[...map.values()];
+ const filters={all:'Todos',want:'Quero jogar',playing:'Jogando',beaten:'Zerados',archived:'Arquivados',favorites:'Favoritos'};
+ const filtered=all.filter(item=>collectionFilter==='all'||collectionFilter==='favorites'?(collectionFilter==='all'||item.isFavorite):item.status===collectionFilter);
+ const filtersNode=$('collectionFilters');
+ if(filtersNode)filtersNode.innerHTML=Object.entries(filters).map(([keyName,label])=>'<button class="filter-chip'+(collectionFilter===keyName?' active':'')+'" type="button" onclick="setCollectionFilter(\''+keyName+'\')">'+label+'</button>').join('');
+ const totalBeaten=collection.filter(x=>x.status==='beaten').length,totalPlaying=collection.filter(x=>x.status==='playing').length;
+ const stats=$('collectionStats');
+ if(stats)stats.textContent=collection.length+' na coleção · '+totalPlaying+' em andamento · '+totalBeaten+' zerados · '+favorites.length+' favoritos';
+ const target=$('favorites');
+ if(target)target.innerHTML=filtered.length?filtered.map(collectionCard).join(''):'<div class="empty">Sua lista está vazia por aqui. Abra um jogo e adicione-o à sua coleção.</div>';
+}
+
 function card(g){
  const image=safeImage(g.background_image),id=Number(g.id);
  return '<article class="card" role="button" tabindex="0" onclick="detailGame('+id+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();detailGame('+id+')}"><div class="poster">'+(image?'<img class="cover" src="'+esc(image)+'" alt="Capa de '+esc(g.name)+'" loading="lazy">':'<span class="cover-fallback">GAME FINDER</span>')+'</div><div class="cardbody"><h3>'+esc(g.name)+'</h3><div class="chips"><span class="chip">★ '+(g.rating?Number(g.rating).toFixed(1):'—')+'</span><span class="chip">'+esc((g.genres||[]).slice(0,1).map(x=>x.name).join('')||'PS5')+'</span></div><p>'+esc(g.description_raw||'Abra a ficha para consultar os detalhes e as imagens disponíveis.')+'</p></div></article>';
@@ -79,22 +248,30 @@ async function findRawgGameForCatalog(item){
  return best.game;
 }
 async function loadCatalogScreenshots(item,token){
- const target=$('catalogScreenshots');if(!target)return;
+ const target=$('catalogScreenshots'),synopsisTarget=$('catalogSynopsis');
+ if(!target)return;
  if(!key()){
   target.innerHTML='<div class="info">Para ver cenas reais do jogo, conecte sua chave RAWG em Ajustes. <button class="btn small primary" type="button" onclick="closeDetail();go(\'settings\')">Configurar RAWG</button></div>';
+  if(synopsisTarget)synopsisTarget.innerHTML='<div class="info">A sinopse em português e as capturas precisam da conexão RAWG. Configure a chave em Ajustes.</div>';
   return;
  }
  target.innerHTML='<div class="empty">Buscando imagens de gameplay…</div>';
+ if(synopsisTarget)synopsisTarget.innerHTML='<div class="empty">Buscando sinopse e preparando tradução…</div>';
  try{
   const match=await findRawgGameForCatalog(item);
   if(token!==detailToken)return;
-  let shots=rawgScreenshotCache[match.id];
-  if(!shots){
-   const data=await api('/games/'+match.id+'/screenshots',{page_size:12});
-   shots=(data.results||[]).map(x=>safeImage(x.image)).filter(Boolean);
-   rawgScreenshotCache[match.id]=shots;
-  }
+  const [details,shots]=await Promise.all([
+   rawgDetailsCache[match.id]?Promise.resolve(rawgDetailsCache[match.id]):api('/games/'+match.id,{}).catch(()=>null),
+   rawgScreenshotCache[match.id]?Promise.resolve(rawgScreenshotCache[match.id]):api('/games/'+match.id+'/screenshots',{page_size:12}).then(data=>(data.results||[]).map(x=>safeImage(x.image)).filter(Boolean)).catch(()=>[])
+  ]);
   if(token!==detailToken)return;
+  if(details){
+   rawgDetailsCache[match.id]=details;
+   if(synopsisTarget)loadTranslatedSynopsis(details,'catalogSynopsis',token);
+  }else if(synopsisTarget){
+   synopsisTarget.innerHTML='<div class="empty">Não foi possível carregar a sinopse pela RAWG neste momento.</div>';
+  }
+  rawgScreenshotCache[match.id]=shots;
   if(!shots.length){
    target.innerHTML='<div class="empty">A RAWG encontrou "'+esc(match.name)+'", mas não há capturas cadastradas para este título.</div>';
    return;
@@ -105,15 +282,16 @@ async function loadCatalogScreenshots(item,token){
  }catch(error){
   if(token!==detailToken)return;
   target.innerHTML='<div class="notice">'+esc(error.message||'Não foi possível carregar as imagens de gameplay.')+'</div>';
+  if(synopsisTarget)synopsisTarget.innerHTML='<div class="empty">Não foi possível buscar a sinopse neste momento.</div>';
  }
 }
 async function showCatalogDetail(id){
- const g=catalogById[id];if(!g)return;activeStoreGame=g;
+ const g=catalogById[id];if(!g)return;activeStoreGame=g;activeGame=null;
  const token=++detailToken;
  const image=safeImage(g.image),href='https://store.playstation.com/pt-br/product/'+encodeURIComponent(g.uuid);
  const saved=read(FAV).some(x=>x.id==='psn:'+id);
  $('modal').classList.add('open');
- $('detail').innerHTML='<h2>'+esc(g.name)+'</h2>'+(image?'<img class="detail-cover" src="'+esc(image)+'" alt="Capa de '+esc(g.name)+'">':'')+'<div class="chips"><span class="chip">PlayStation 5</span><span class="chip">Catálogo geral</span></div><p>Confira cenas reais do jogo abaixo, além da edição e disponibilidade na loja brasileira.</p><div class="row"><button class="btn primary" onclick="toggleStoreFav()">'+(saved?'♥ Remover dos favoritos':'♡ Favoritar')+'</button><a class="btn" href="'+esc(href)+'" target="_blank" rel="noopener">Ver na PlayStation Store ↗</a></div><h3 class="section-subtitle">Cenas do jogo · imagens in-game</h3><div id="catalogScreenshots" aria-live="polite"><div class="empty">Preparando galeria…</div></div><p class="muted fineprint">Título da biblioteca: fonte comunitária. As capturas adicionais são consultadas na RAWG.</p>';
+ $('detail').innerHTML='<h2>'+esc(g.name)+'</h2>'+(image?'<img class="detail-cover" src="'+esc(image)+'" alt="Capa de '+esc(g.name)+'">':'')+'<div class="chips"><span class="chip">PlayStation 5</span><span class="chip">Catálogo geral</span></div><h3 class="section-subtitle">Sinopse</h3><div id="catalogSynopsis" aria-live="polite"><div class="empty">Preparando sinopse em português…</div></div>'+collectionControlsHTML('psn:'+String(g.uuid))+'<div class="row"><button class="btn primary" onclick="toggleStoreFav()">'+(saved?'♥ Remover dos favoritos':'♡ Favoritar')+'</button><a class="btn" href="'+esc(href)+'" target="_blank" rel="noopener">Ver na PlayStation Store ↗</a></div><h3 class="section-subtitle">Cenas do jogo · imagens in-game</h3><div id="catalogScreenshots" aria-live="polite"><div class="empty">Preparando galeria…</div></div><p class="muted fineprint">Título da biblioteca: fonte comunitária. As capturas adicionais são consultadas na RAWG.</p>';
  loadCatalogScreenshots(g,token);
 }
 function toggleStoreFav(){if(!activeStoreGame)return;const id='psn:'+String(activeStoreGame.uuid||'');let arr=read(FAV);if(arr.some(x=>x.id===id))arr=arr.filter(x=>x.id!==id);else arr.push({id,name:activeStoreGame.name,background_image:activeStoreGame.image||'',storeURL:'https://store.playstation.com/pt-br/product/'+encodeURIComponent(activeStoreGame.uuid),source:'PS5'});localStorage.setItem(FAV,JSON.stringify(arr));showCatalogDetail(String(activeStoreGame.uuid).replace(/[^A-Za-z0-9_-]/g,''))}
@@ -168,17 +346,39 @@ async function searchGames(reset){
 function page(n){pageNo=Math.max(1,Math.min(maxPage,pageNo+n));renderCatalogPage();window.scrollTo({top:0,behavior:'smooth'})}
 
 async function detailGame(id){
+ const token=++detailToken;activeStoreGame=null;
  $('modal').classList.add('open');$('detail').innerHTML='<div class="empty">Carregando ficha e capturas…</div>';
  try{
-  const pair=await Promise.all([api('/games/'+id,{}),api('/games/'+id+'/screenshots',{page_size:8})]);
-  const g=pair[0],shots=pair[1].results||[];activeGame=g;
-  const website=safeLink(g.website),favorite=read(FAV).some(x=>x.id===g.id);
+  const [g,shotData]=await Promise.all([
+   api('/games/'+id,{}),
+   api('/games/'+id+'/screenshots',{page_size:8}).catch(()=>({results:[]}))
+  ]);
+  if(token!==detailToken)return;
+  activeGame=g;
+  const shots=shotData.results||[],website=safeLink(g.website),favorite=read(FAV).some(x=>String(x.id)===String(g.id));
   const shotHtml=shots.map(x=>{const img=safeImage(x.image);return img?'<a target="_blank" rel="noopener" href="'+esc(img)+'"><img src="'+esc(img)+'" alt="Captura de '+esc(g.name)+'" loading="lazy"></a>':''}).join('');
-  $('detail').innerHTML='<h2>'+esc(g.name)+'</h2><div class="chips"><span class="chip">★ '+(g.rating||'—')+'</span><span class="chip">Metacritic '+(g.metacritic||'—')+'</span><span class="chip">'+esc(g.released||'Data não informada')+'</span></div><p>'+esc(g.description_raw||'Sinopse não disponível nesta fonte.')+'</p><p class="muted">Gêneros: '+esc((g.genres||[]).map(x=>x.name).join(', ')||'Não informado')+'</p><p class="muted">Plataformas: '+esc((g.platforms||[]).map(x=>x.platform.name).join(', ')||'Não informado')+'</p><div class="row"><button class="btn primary" id="detailFavorite" onclick="toggleFav(activeGame)">'+(favorite?'♥ Salvo nos favoritos':'♡ Salvar nos favoritos')+'</button>'+(website?'<a class="btn" href="'+esc(website)+'" target="_blank" rel="noopener">Site oficial ↗</a>':'')+'</div><h3 class="section-subtitle">Imagens do jogo</h3><div class="screens">'+(shotHtml||'<p class="muted">Nenhuma captura disponível.</p>')+'</div><p class="fineprint muted">Detalhes e imagens fornecidos pela RAWG. Confira a loja e a edição antes de comprar.</p>';
- }catch(e){$('detail').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}
+  $('detail').innerHTML='<h2>'+esc(g.name)+'</h2><div class="chips"><span class="chip">★ '+(g.rating||'—')+'</span><span class="chip">Metacritic '+(g.metacritic||'—')+'</span><span class="chip">'+esc(g.released||'Data não informada')+'</span></div><h3 class="section-subtitle">Sinopse</h3><div id="gameSynopsis" aria-live="polite"><div class="empty">Preparando sinopse em português…</div></div>'+collectionControlsHTML(g.id)+'<p class="muted">Gêneros: '+esc((g.genres||[]).map(x=>x.name).join(', ')||'Não informado')+'</p><p class="muted">Plataformas: '+esc((g.platforms||[]).map(x=>x.platform.name).join(', ')||'Não informado')+'</p><div class="row"><button class="btn primary" id="detailFavorite" onclick="toggleFav(activeGame)">'+(favorite?'♥ Salvo nos favoritos':'♡ Salvar nos favoritos')+'</button>'+(website?'<a class="btn" href="'+esc(website)+'" target="_blank" rel="noopener">Site oficial ↗</a>':'')+'</div><h3 class="section-subtitle">Imagens do jogo</h3><div class="screens">'+(shotHtml||'<p class="muted">Nenhuma captura disponível.</p>')+'</div><p class="fineprint muted">Detalhes e imagens fornecidos pela RAWG. Confira a loja e a edição antes de comprar.</p>';
+  loadTranslatedSynopsis(g,'gameSynopsis',token);
+ }catch(e){if(token===detailToken)$('detail').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}
 }
-function closeDetail(){$('modal').classList.remove('open')}
-function read(key){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch{return []}}
+function closeDetail(){detailToken++;$('modal').classList.remove('open')}
+function read(key){try{const value=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(value)?value:[]}catch{return []}}
+function renderFav(){
+ const favorites=read(FAV),collection=read(COLL),map=new Map();
+ favorites.forEach(item=>map.set(String(item.id),{...item,isFavorite:true}));
+ collection.forEach(item=>map.set(String(item.id),{...(map.get(String(item.id))||{}),...item,isFavorite:!!(map.get(String(item.id))||{}).isFavorite}));
+ const all=[...map.values()];
+ const filters={all:'Todos',want:'Quero jogar',playing:'Jogando',beaten:'Zerados',archived:'Arquivados',favorites:'Favoritos'};
+ const filtered=all.filter(item=>collectionFilter==='all'||(collectionFilter==='favorites'?item.isFavorite:item.status===collectionFilter));
+ const filtersNode=$('collectionFilters');
+ if(filtersNode)filtersNode.innerHTML=Object.entries(filters).map(([keyName,label])=>'<button class="filter-chip'+(collectionFilter===keyName?' active':'')+'" type="button" onclick="setCollectionFilter(\''+keyName+'\')">'+label+'</button>').join('');
+ const totalBeaten=collection.filter(x=>x.status==='beaten').length,totalPlaying=collection.filter(x=>x.status==='playing').length;
+ const stats=$('collectionStats');
+ if(stats)stats.textContent=collection.length+' na coleção · '+totalPlaying+' em andamento · '+totalBeaten+' zerados · '+favorites.length+' favoritos';
+ const target=$('favorites');
+ if(target)target.innerHTML=filtered.length?filtered.map(collectionCard).join(''):'<div class="empty">Sua lista está vazia por aqui. Abra um jogo e adicione-o à sua coleção.</div>';
+}
+function setCollectionFilter(filter){collectionFilter=filter;renderFav();}
 function toggleFav(g){
  if(!g)return;
  let arr=read(FAV);
@@ -187,6 +387,13 @@ function toggleFav(g){
  localStorage.setItem(FAV,JSON.stringify(arr));renderFav();
  const button=$('detailFavorite');
  if(button)button.textContent=arr.some(x=>x.id===g.id)?'♥ Salvo nos favoritos':'♡ Salvar nos favoritos';
+}
+function buildQuestions(){
+ const choices=[
+  ['action','Ação'],['adventure','Aventura'],['role-playing-games','RPG'],['shooter','Tiro'],['sports','Esportes'],['racing','Corrida'],['strategy','Estratégia'],['indie','Indie'],['puzzle','Quebra-cabeça']
+ ];
+ const target=$('questions');if(!target)return;
+ target.innerHTML='<div class="q"><b>Qual estilo combina com você agora?</b><div class="choices">'+choices.map(([value,label])=>'<button class="choice'+(answers.mood===value?' selected':'')+'" data-q="mood" data-v="'+value+'" type="button" onclick="pick(this)">'+label+'</button>').join('')+'</div><p class="helper muted">Você pode escolher um gênero ou deixar sem filtro para receber sugestões variadas.</p></div>';
 }
 function pick(b){answers[b.dataset.q]=b.dataset.v;document.querySelectorAll('[data-q="'+b.dataset.q+'"]').forEach(x=>x.classList.toggle('selected',x===b))}
 function resetQ(){answers={};buildQuestions();$('recommendations').innerHTML=''}
@@ -224,3 +431,4 @@ async function installApp(){if(installPrompt){installPrompt.prompt();await insta
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e});
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.warn));
 buildQuestions();loadFeatured();loadPlusCatalog().then(renderPlus);renderFav();if(key())$('status').textContent='● RAWG configurada';else $('status').textContent='● Catálogo PS5 pronto';
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('modal').classList.contains('open'))closeDetail()});
