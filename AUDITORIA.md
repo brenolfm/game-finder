@@ -113,6 +113,6 @@ A navegação por teclado e os estados de foco foram melhorados. Ainda seria des
 
 - O resumo é automático e extrativo, não uma sinopse escrita por um editor ou por um modelo generativo. Pode selecionar frases menos relevantes em descrições muito longas.
 - Serviços de tradução gratuitos podem impor limites, responder com erro ou alterar seus endpoints. A aplicação mantém um fallback e não bloqueia o restante da ficha.
-- A coleção e os favoritos ficam no armazenamento local do navegador. Limpar os dados do site pode apagá-los; ainda não existe exportação nem sincronização.
+- A coleção e os favoritos ficam no armazenamento local do navegador. Há exportação e importação manual em JSON, com mesclagem dos dados; ainda não existe sincronização automática entre dispositivos. Limpar os dados do site sem um backup pode apagá-los.
 - Os alertas de lançamento, perfis, avaliações sociais e compartilhamento de coleções do Stash dependem de serviços adicionais e não foram copiados para esta aplicação estática.
 - O arquivo catalogo-psplus.json permanece sem dados regionais verificados; esta revisão não altera a situação da seção PS Plus.
