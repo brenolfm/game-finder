@@ -35,7 +35,8 @@ function toggleKey(){$('apiKey').type=$('apiKey').type==='password'?'text':'pass
 function removeKey(){localStorage.removeItem(KEY);$('apiKey').value='';$('keyMsg').textContent='Chave removida deste navegador.';$('status').textContent='● Catálogo PS5 pronto'}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function safeImage(value){
- try{const u=new URL(String(value||''));const ok=['media.rawg.io','image.api.playstation.com'];return u.protocol==='https:'&&ok.some(h=>u.hostname===h||u.hostname.endsWith('.'+h))?u.href:''}catch{return ''}
+ const raw=String(value||'').trim();
+ return /^https:\/\/(?:media\.rawg\.io|image\.api\.playstation\.com)\//i.test(raw)?raw:'';
 }
 function safeLink(value){try{const u=new URL(String(value||''));return ['https:','http:'].includes(u.protocol)?u.href:''}catch{return ''}}
 function card(g){
@@ -59,6 +60,21 @@ function favoriteCatalogCard(g){
  const image=safeImage(g.background_image),href=safeLink(g.storeURL);
  const content='<div class="poster">'+(image?'<img class="cover" src="'+esc(image)+'" alt="Capa de '+esc(g.name)+'" loading="lazy">':'<span class="cover-fallback">PS5</span>')+'</div><div class="cardbody"><h3>'+esc(g.name)+'</h3><span class="chip">PS5 · Favorito</span></div>';
  return href?'<a class="card card-link" href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+content+'</a>':'<article class="card">'+content+'</article>';
+}
+
+
+async function loadFeatured(){
+ const target=$('featured');if(!target)return;
+ target.innerHTML='<div class="empty">Carregando capas dos jogos…</div>';
+ try{
+  const response=await fetch('./destaques.json',{cache:'no-cache'});
+  if(!response.ok)throw Error('Não foi possível carregar os jogos em destaque.');
+  const items=await response.json();
+  const valid=Array.isArray(items)?items.filter(x=>x&&x.name&&x.uuid&&safeImage(x.image)): [];
+  target.innerHTML=valid.length?valid.map(catalogCard).join(''):'<div class="empty">As capas ainda não estão disponíveis. Abra a biblioteca completa.</div>';
+ }catch(error){
+  target.innerHTML='<div class="empty">Não foi possível carregar as capas agora. Confira sua conexão ou abra a biblioteca.</div>';
+ }
 }
 
 function showCards(id,arr){$(id).innerHTML=arr&&arr.length?arr.map(card).join(''):'<div class="empty">Nenhum jogo encontrado.</div>'}
@@ -146,4 +162,4 @@ function renderPlus(){
 async function installApp(){if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null}else alert('No Chrome: menu ⋮ > Instalar app ou Adicionar à tela inicial. No Samsung Internet: menu ☰ > Adicionar página a > Tela inicial.')}
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e});
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.warn));
-buildQuestions();loadPlusCatalog().then(renderPlus);renderFav();if(key())$('status').textContent='● RAWG configurada';else $('status').textContent='● Catálogo PS5 pronto';
+buildQuestions();loadFeatured();loadPlusCatalog().then(renderPlus);renderFav();if(key())$('status').textContent='● RAWG configurada';else $('status').textContent='● Catálogo PS5 pronto';
