@@ -89,3 +89,6 @@ Ao abrir um título listado na biblioteca ou nos destaques, o aplicativo usa o n
 - Filtros disponíveis: nativo PS5 ou PS4 + PS5; recorte PS Plus Deluxe; avaliação mínima RAWG; ordenação A–Z, Z–A, maior nota e menor nota.
 - A ordenação por avaliação usa um índice local construído a partir das 160 primeiras correspondências retornadas pela RAWG entre os jogos PS5 mais bem avaliados. Portanto, títulos sem correspondência aparecem sem nota e ficam ao final; isso não equivale a uma nota verificada para os 10.439 jogos.
 - O filtro PS Plus é um recorte parcial e datado, não deve ser entendido como a lista completa de jogos incluídos no plano.
+
+- A aba **Recomendar** entrega uma indicação principal por vez, ordenada por avaliação e gênero; o usuário pode pedir outra sugestão sem responder novamente.
+- A associação de notas RAWG aos títulos do catálogo é memorizada durante a sessão, para evitar repetir comparações dentro da ordenação de milhares de jogos.
