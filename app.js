@@ -198,7 +198,7 @@ function renderFav(){
  collection.forEach(item=>map.set(String(item.id),{...(map.get(String(item.id))||{}),...item,isFavorite:!!(map.get(String(item.id))||{}).isFavorite}));
  const all=[...map.values()];
  const filters={all:'Todos',want:'Quero jogar',playing:'Jogando',beaten:'Zerados',archived:'Arquivados',favorites:'Favoritos'};
- const filtered=all.filter(item=>collectionFilter==='all'||collectionFilter==='favorites'?(collectionFilter==='all'||item.isFavorite):item.status===collectionFilter);
+ const filtered=all.filter(item=>{if(collectionFilter==='all')return true;if(collectionFilter==='favorites')return !!item.isFavorite;return item.status===collectionFilter});
  const filtersNode=$('collectionFilters');
  if(filtersNode)filtersNode.innerHTML=Object.entries(filters).map(([keyName,label])=>'<button class="filter-chip'+(collectionFilter===keyName?' active':'')+'" type="button" onclick="setCollectionFilter(\''+keyName+'\')">'+label+'</button>').join('');
  const totalBeaten=collection.filter(x=>x.status==='beaten').length,totalPlaying=collection.filter(x=>x.status==='playing').length;
