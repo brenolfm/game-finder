@@ -97,16 +97,19 @@ async function detailGame(id){
   const g=pair[0],shots=pair[1].results||[];activeGame=g;
   const website=safeLink(g.website),favorite=read(FAV).some(x=>x.id===g.id);
   const shotHtml=shots.map(x=>{const img=safeImage(x.image);return img?'<a target="_blank" rel="noopener" href="'+esc(img)+'"><img src="'+esc(img)+'" alt="Captura de '+esc(g.name)+'" loading="lazy"></a>':''}).join('');
-  $('detail').innerHTML='<h2>'+esc(g.name)+'</h2><div class="chips"><span class="chip">★ '+(g.rating||'—')+'</span><span class="chip">Metacritic '+(g.metacritic||'—')+'</span><span class="chip">'+esc(g.released||'Data não informada')+'</span></div><p>'+esc(g.description_raw||'Sinopse não disponível nesta fonte.')+'</p><p class="muted">Gêneros: '+esc((g.genres||[]).map(x=>x.name).join(', ')||'Não informado')+'</p><p class="muted">Plataformas: '+esc((g.platforms||[]).map(x=>x.platform.name).join(', ')||'Não informado')+'</p><div class="row"><button class="btn primary" onclick="toggleFav(activeGame)">'+(favorite?'♥ Salvo nos favoritos':'♡ Salvar nos favoritos')+'</button>'+(website?'<a class="btn" href="'+esc(website)+'" target="_blank" rel="noopener">Site oficial ↗</a>':'')+'</div><h3 class="section-subtitle">Imagens do jogo</h3><div class="screens">'+(shotHtml||'<p class="muted">Nenhuma captura disponível.</p>')+'</div><p class="fineprint muted">Detalhes e imagens fornecidos pela RAWG. Confira a loja e a edição antes de comprar.</p>';
+  $('detail').innerHTML='<h2>'+esc(g.name)+'</h2><div class="chips"><span class="chip">★ '+(g.rating||'—')+'</span><span class="chip">Metacritic '+(g.metacritic||'—')+'</span><span class="chip">'+esc(g.released||'Data não informada')+'</span></div><p>'+esc(g.description_raw||'Sinopse não disponível nesta fonte.')+'</p><p class="muted">Gêneros: '+esc((g.genres||[]).map(x=>x.name).join(', ')||'Não informado')+'</p><p class="muted">Plataformas: '+esc((g.platforms||[]).map(x=>x.platform.name).join(', ')||'Não informado')+'</p><div class="row"><button class="btn primary" id="detailFavorite" onclick="toggleFav(activeGame)">'+(favorite?'♥ Salvo nos favoritos':'♡ Salvar nos favoritos')+'</button>'+(website?'<a class="btn" href="'+esc(website)+'" target="_blank" rel="noopener">Site oficial ↗</a>':'')+'</div><h3 class="section-subtitle">Imagens do jogo</h3><div class="screens">'+(shotHtml||'<p class="muted">Nenhuma captura disponível.</p>')+'</div><p class="fineprint muted">Detalhes e imagens fornecidos pela RAWG. Confira a loja e a edição antes de comprar.</p>';
  }catch(e){$('detail').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}
 }
 function closeDetail(){$('modal').classList.remove('open')}
 function read(key){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch{return []}}
-function toggleFav(g){if(!g)return;let a=read(FAV);if(a.some(x=>x.id===g.id))a=a.filter(x=>x.id!==g.id);else a.push({id:g.id,name:g.name,background_image:g.background_image,rating:g.rating,genres:g.genres||[]});localStorage.setItem(FAV,JSON.stringify(a));renderFav()}
-function renderFav(){const arr=read(FAV);$('favorites').innerHTML=arr.length?arr.map(x=>x.storeURL?favoriteCatalogCard(x):'<article class="card" onclick="detailGame('+Number(x.id)+')"><div class="poster" '+(x.background_image?'style="background-image:url('+esc(x.background_image)+')"':'')+'><b>'+esc(x.name)+'</b></div><div class="cardbody"><h3>'+esc(x.name)+'</h3><span class="chip">Favorito</span></div></article>').join(''):'<div class="empty">Você ainda não salvou nenhum jogo.</div>'}
-function buildQuestions(){
- const options=[['action','Ação'],['adventure','Aventura'],['role-playing-games-rpg','RPG'],['shooter','Tiro'],['horror','Terror'],['sports','Esportes'],['racing','Corrida'],['indie','Indie']];
- $('questions').innerHTML='<div class="q"><b>Qual gênero você está com vontade de jogar?</b><div class="choices">'+options.map(o=>'<button type="button" class="choice '+(answers.mood===o[0]?'selected':'')+'" data-q="mood" data-v="'+o[0]+'" onclick="pick(this)">'+o[1]+'</button>').join('')+'<button type="button" class="choice '+(!answers.mood?'selected':'')+'" data-q="mood" data-v="" onclick="pick(this)">Surpreenda-me</button></div></div><p class="sub helper">A recomendação usa jogos de PS5 e o gênero escolhido. Ainda não filtramos duração ou cooperação, para não prometer dados que a fonte não fornece.</p>';
+function toggleFav(g){
+ if(!g)return;
+ let arr=read(FAV);
+ if(arr.some(x=>x.id===g.id))arr=arr.filter(x=>x.id!==g.id);
+ else arr.push({id:g.id,name:g.name,background_image:g.background_image,rating:g.rating,genres:g.genres||[]});
+ localStorage.setItem(FAV,JSON.stringify(arr));renderFav();
+ const button=$('detailFavorite');
+ if(button)button.textContent=arr.some(x=>x.id===g.id)?'♥ Salvo nos favoritos':'♡ Salvar nos favoritos';
 }
 function pick(b){answers[b.dataset.q]=b.dataset.v;document.querySelectorAll('[data-q="'+b.dataset.q+'"]').forEach(x=>x.classList.toggle('selected',x===b))}
 function resetQ(){answers={};buildQuestions();$('recommendations').innerHTML=''}
