@@ -32,7 +32,7 @@ async function saveKey(){
  }catch(e){$('keyMsg').textContent=e.message||'Não foi possível testar a chave.'}
 }
 function toggleKey(){$('apiKey').type=$('apiKey').type==='password'?'text':'password'}
-function removeKey(){localStorage.removeItem(KEY);$('apiKey').value='';$('keyMsg').textContent='Chave removida.'}
+function removeKey(){localStorage.removeItem(KEY);$('apiKey').value='';$('keyMsg').textContent='Chave removida deste navegador.';$('status').textContent='● Catálogo PS5 pronto'}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function safeImage(value){
  try{const u=new URL(String(value||''));const ok=['media.rawg.io','image.api.playstation.com'];return u.protocol==='https:'&&ok.some(h=>u.hostname===h||u.hostname.endsWith('.'+h))?u.href:''}catch{return ''}
@@ -56,8 +56,9 @@ function showCatalogDetail(id){
 }
 function toggleStoreFav(){if(!activeStoreGame)return;const id='psn:'+String(activeStoreGame.uuid||'');let arr=read(FAV);if(arr.some(x=>x.id===id))arr=arr.filter(x=>x.id!==id);else arr.push({id,name:activeStoreGame.name,background_image:activeStoreGame.image||'',storeURL:'https://store.playstation.com/pt-br/product/'+encodeURIComponent(activeStoreGame.uuid),source:'PS5'});localStorage.setItem(FAV,JSON.stringify(arr));showCatalogDetail(String(activeStoreGame.uuid).replace(/[^A-Za-z0-9_-]/g,''))}
 function favoriteCatalogCard(g){
- const image=safeImage(g.background_image),href=safeLink(g.storeURL)||'#';
- return '<article class="card" onclick="window.open(\''+esc(href)+'\',\'_blank\',\'noopener\')"><div class="poster">'+(image?'<img class="cover" src="'+esc(image)+'" alt="Capa de '+esc(g.name)+'" loading="lazy">':'<span class="cover-fallback">PS5</span>')+'</div><div class="cardbody"><h3>'+esc(g.name)+'</h3><span class="chip">PS5 · Favorito</span></div></article>';
+ const image=safeImage(g.background_image),href=safeLink(g.storeURL);
+ const content='<div class="poster">'+(image?'<img class="cover" src="'+esc(image)+'" alt="Capa de '+esc(g.name)+'" loading="lazy">':'<span class="cover-fallback">PS5</span>')+'</div><div class="cardbody"><h3>'+esc(g.name)+'</h3><span class="chip">PS5 · Favorito</span></div>';
+ return href?'<a class="card card-link" href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+content+'</a>':'<article class="card">'+content+'</article>';
 }
 
 function showCards(id,arr){$(id).innerHTML=arr&&arr.length?arr.map(card).join(''):'<div class="empty">Nenhum jogo encontrado.</div>'}
