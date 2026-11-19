@@ -50,10 +50,12 @@ function catalogCard(g){
 }
 function normalizeGameTitle(value){
  return String(value||'').toLowerCase()
-  .replace(/\\b(ps4\\s*&\\s*ps5|ps5|ps4)\\b/gi,' ')
-  .replace(/\\b(digital\\s+deluxe|deluxe|ultimate|complete|director.?s\\s+cut|definitive|game\\s+of\\s+the\\s+year)\\s+edition\\b/gi,' ')
-  .normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')
-  .replace(/[^a-z0-9]+/g,' ').trim().replace(/\\s+/g,' ');
+  .replace(/\b(ps4\s*(?:&|and)\s*ps5|ps5|ps4)\b/gi,' ')
+  .replace(/\b(digital\s+deluxe|deluxe|ultimate|complete|definitive|game\s+of\s+the\s+year)\s+edition\b/gi,' ')
+  .replace(/\bdirector.?s\s+cut\b/gi,' ')
+  .replace(/\bedition\b/gi,' ')
+  .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  .replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
 }
 function rawgMatchScore(query,title){
  const a=normalizeGameTitle(query),b=normalizeGameTitle(title);
@@ -62,8 +64,7 @@ function rawgMatchScore(query,title){
  if(a.length>6&&(b.includes(a)||a.includes(b)))return .88;
  const aa=new Set(a.split(' ')),bb=new Set(b.split(' '));
  const common=[...aa].filter(t=>bb.has(t));
- const score=common.length/Math.max(aa.size,bb.size);
- return score;
+ return common.length/Math.max(aa.size,bb.size);
 }
 async function findRawgGameForCatalog(item){
  const query=normalizeGameTitle(item.name);
