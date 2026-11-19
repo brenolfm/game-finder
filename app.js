@@ -519,6 +519,7 @@ async function searchGames(reset){
  if(term){
   const first=normalizeGameTitle(term).charAt(0).toLowerCase();
   letter=/[a-z]/.test(first)?first:'_';
+  $('letter').value=letter;
  }else{
   $('letter').value=letter;
  }
