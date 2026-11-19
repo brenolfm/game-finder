@@ -1,0 +1,88 @@
+[
+  {
+    "name": "ASTRO BOT",
+    "image": "https://image.api.playstation.com/vulcan/ap/rnd/202406/0500/8f15268257b878597757fcc5f2c9545840867bc71fc863b1.png",
+    "uuid": "UP9000-PPSA21564_00-0000000000000000",
+    "platforms": [
+      "PS5"
+    ],
+    "source": "Ephellon/game-store-catalog"
+  },
+  {
+    "name": "ELDEN RING PS4 & PS5",
+    "image": "https://image.api.playstation.com/vulcan/ap/rnd/202110/2000/phvVT0qZfcRms5qDAk0SI3CM.png",
+    "uuid": "UP0700-PPSA04610_00-ELDENRING0000000",
+    "platforms": [
+      "PS4",
+      "PS5"
+    ],
+    "source": "Ephellon/game-store-catalog"
+  },
+  {
+    "name": "Gran Turismo 7",
+    "image": "https://image.api.playstation.com/vulcan/ap/rnd/202511/0707/303f5701426596a09891f9f33fa93e49ae522d5295b26dce.png",
+    "uuid": "UP9000-PPSA01317_00-GT7STD0000000PS5",
+    "platforms": [
+      "PS4",
+      "PS5"
+    ],
+    "source": "Ephellon/game-store-catalog"
+  },
+  {
+    "name": "Ghost of Tsushima DIRECTOR’S CUT",
+    "image": "https://image.api.playstation.com/vulcan/ap/rnd/202106/2322/c16gs6a7lbAYzPf7ZTikbH1c.png",
+    "uuid": "UP9000-PPSA02225_00-GHOSTDIRECTORPS5",
+    "platforms": [
+      "PS4",
+      "PS5"
+    ],
+    "source": "Ephellon/game-store-catalog"
+  },
+  {
+    "name": "God of War Ragnarök",
+    "image": "https://image.api.playstation.com/vulcan/ap/rnd/202503/2016/b69c06fb108299866057126b0d3a0530bdf96a39d2ce1cb9.png",
+    "uuid": "UP9000-PPSA08329_00-GOWRAGNAROK00000",
+    "platforms": [
+      "PS4",
+      "PS5"
+    ],
+    "source": "Ephellon/game-store-catalog"
+  },
+  {
+    "name": "Horizon Forbidden West",
+    "image": "https://image.api.playstation.com/vulcan/ap/rnd/202107/3100/HO8vkO9pfXhwbHi5WHECQJdN.png",
+    "uuid": "UP9000-PPSA04072_00-FORBIDDENWESTPS5",
+    "platforms": [
+      "PS4",
+      "PS5"
+    ],
+    "source": "Ephellon/game-store-catalog"
+  },
+  {
+    "name": "Marvel’s Spider-Man 2",
+    "image": "https://image.api.playstation.com/vulcan/ap/rnd/202306/1219/1c7b75d8ed9271516546560d219ad0b22ee0a263b4537bd8.png",
+    "uuid": "UP9000-PPSA03016_00-MARVELSPIDERMAN2",
+    "platforms": [
+      "PS5"
+    ],
+    "source": "Ephellon/game-store-catalog"
+  },
+  {
+    "name": "The Last of Us Part II Remastered",
+    "image": "https://image.api.playstation.com/vulcan/ap/rnd/202312/0117/315718bce7eed62e3cf3fb02d61b81ff1782d6b6cf850fa4.png",
+    "uuid": "UP9000-PPSA10662_00-THELASTOFUSPART2",
+    "platforms": [
+      "PS5"
+    ],
+    "source": "Ephellon/game-store-catalog"
+  },
+  {
+    "name": "UNCHARTED: Legacy of Thieves Collection",
+    "image": "https://image.api.playstation.com/vulcan/ap/rnd/202111/2000/gTUWTlvPHzxFJ2JAxtDyI2eS.png",
+    "uuid": "UP9000-PPSA05389_00-UNCHARTED4R00000",
+    "platforms": [
+      "PS5"
+    ],
+    "source": "Ephellon/game-store-catalog"
+  }
+]
