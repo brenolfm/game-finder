@@ -16,7 +16,7 @@
 <div class="app">
   <header class="top">
     <a class="brand" href="./" aria-label="GAME FINDER início">GAME <span>FINDER</span></a>
-    <div class="status" id="status" role="status" aria-live="polite">● Preparando</div>
+    <div class="top-actions"><div class="status" id="status" role="status" aria-live="polite">● Preparando</div><button class="btn small quiet settings-shortcut" type="button" onclick="go('settings')" aria-label="Abrir ajustes">⚙ <span>Ajustes</span></button></div>
   </header>
 
   <main>
@@ -31,11 +31,8 @@
     </section>
 
     <nav class="nav" aria-label="Navegação principal">
-      <button class="active" data-v="discover" type="button" onclick="go('discover')" aria-current="page"><span class="nav-icon">✦</span><span>Descobrir</span></button>
-      <button data-v="library" type="button" onclick="go('library')"><span class="nav-icon">▦</span><span>PS5</span></button>
-      <button data-v="plus" type="button" onclick="go('plus')"><span class="nav-icon">＋</span><span>PS Plus</span></button>
-      <button data-v="saved" type="button" onclick="go('saved')"><span class="nav-icon">♡</span><span>Salvos</span></button>
-      <button data-v="settings" type="button" onclick="go('settings')"><span class="nav-icon">⚙</span><span>Ajustes</span></button>
+      <button class="active" data-v="discover" type="button" onclick="go('discover')" aria-current="page"><span class="nav-icon">✦</span><span>Recomendar</span></button>
+      <button data-v="library" type="button" onclick="go('library')"><span class="nav-icon">▦</span><span>Todos os jogos</span></button>
     </nav>
 
     <section class="view active" id="discover">
@@ -45,56 +42,48 @@
         <div class="actions"><button class="btn primary" type="button" onclick="recommend()">Mostrar recomendações</button><button class="btn quiet" type="button" onclick="resetQ()">Limpar escolha</button></div>
         <div id="recommendations" aria-live="polite"></div>
       </div>
-    </section>
       <div class="section-heading featured-heading"><div><span class="eyebrow">PARA COMEÇAR</span><h2>Jogos em destaque</h2><p class="sub">Alguns títulos para descobrir agora.</p></div><button class="btn small quiet" type="button" onclick="go('library')">Ver biblioteca</button></div>
       <div class="panel"><div id="featured" class="grid"><div class="empty">Carregando capas dos jogos…</div></div><p class="fineprint muted">Seleção da base comunitária Game Store Catalog. A disponibilidade brasileira deve ser conferida na PlayStation Store.</p></div>
+    </section>
 
     <section class="view" id="library">
-      <div class="section-heading"><div><span class="eyebrow">CATÁLOGO</span><h2>Jogos de PS5</h2><p class="sub">Pesquise por nome ou navegue pela lista.</p></div></div>
+      <div class="section-heading"><div><span class="eyebrow">BIBLIOTECA COMPLETA</span><h2>Todos os jogos de PS5</h2><p class="sub">Pesquise enquanto digita, ordene e filtre a biblioteca.</p></div></div>
       <div class="panel">
-        <div class="info"><b>Fonte comunitária.</b> A lista ajuda a descobrir títulos, mas não confirma preço ou disponibilidade na PlayStation Store Brasil.</div>
-        <div class="controls">
-          <label class="search-wrap"><span class="sr-only">Buscar jogo</span><input id="search" type="search" placeholder="Buscar um jogo…" autocomplete="off" onkeydown="if(event.key==='Enter')searchGames(true)"></label>
-          <label><span class="sr-only">Filtrar por letra</span><select id="letter" onchange="searchGames(true)">
+        <div class="info"><b>Catálogo PS5:</b> jogos nativos de PS5 e títulos cross-gen que também rodam no PS5. Fonte comunitária, atualizada conforme a base pública.</div>
+        <div class="catalog-search">
+          <label class="search-wrap" for="search"><span class="sr-only">Buscar jogo por nome</span><input id="search" type="search" list="gameSuggestions" placeholder="Digite o nome do jogo…" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="scheduleSearch()"></label>
+          <datalist id="gameSuggestions"></datalist>
+          <button class="btn small quiet" type="button" onclick="clearGameSearch()">Limpar</button>
+        </div>
+        <div class="catalog-filters">
+          <label><span>Letra</span><select id="letter" onchange="searchGames(true)">
             <option value="_">#</option><option value="a" selected>A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option><option value="e">E</option><option value="f">F</option><option value="g">G</option><option value="h">H</option><option value="i">I</option><option value="j">J</option><option value="k">K</option><option value="l">L</option><option value="m">M</option><option value="n">N</option><option value="o">O</option><option value="p">P</option><option value="q">Q</option><option value="r">R</option><option value="s">S</option><option value="t">T</option><option value="u">U</option><option value="v">V</option><option value="w">W</option><option value="x">X</option><option value="y">Y</option><option value="z">Z</option>
           </select></label>
-          <label><span class="sr-only">Ordenar jogos</span><select id="order" onchange="searchGames(true)"><option value="name">A–Z</option><option value="-name">Z–A</option></select></label>
+          <label><span>Ordenar por</span><select id="order" onchange="searchGames(true)"><option value="name">Nome: A–Z</option><option value="-name">Nome: Z–A</option><option value="rating">Melhor avaliação RAWG</option><option value="-rating">Pior avaliação RAWG</option></select></label>
+          <label><span>Disponibilidade</span><select id="psPlusFilter" onchange="searchGames(true)"><option value="all">Todos os jogos</option><option value="deluxe">Disponíveis na PS Plus Deluxe</option></select></label>
+          <label><span>Versão</span><select id="platformFilter" onchange="searchGames(true)"><option value="all">Todos que rodam no PS5</option><option value="ps5">Nativo de PS5</option><option value="cross">PS4 + PS5</option></select></label>
+          <label><span>Avaliação mínima</span><select id="ratingFilter" onchange="searchGames(true)"><option value="0">Qualquer nota</option><option value="4">4,0 ou mais</option><option value="4.5">4,5 ou mais</option></select></label>
         </div>
-        <div class="list-toolbar"><span id="count" class="muted" aria-live="polite">Carregando catálogo…</span><button class="btn small" type="button" onclick="searchGames(true)">Atualizar lista</button></div>
+        <div class="list-toolbar"><span id="count" class="muted" aria-live="polite">Carregando catálogo…</span><button class="btn small" type="button" onclick="searchGames(true)">Atualizar</button></div>
         <div id="results" class="grid"></div>
         <div class="pagination"><button class="btn quiet" id="prev" type="button" onclick="page(-1)" disabled>Anterior</button><span id="pageInfo" class="muted">Página 1</span><button class="btn quiet" id="next" type="button" onclick="page(1)" disabled>Próxima</button></div>
-        <p class="fineprint muted">Capas e informações pertencem aos respectivos titulares. Confirme a disponibilidade regional na loja.</p>
+        <p class="fineprint muted">As notas são da RAWG e só aparecem quando existe correspondência para o jogo. A disponibilidade da PS Plus pode mudar; confira no console antes de baixar.</p>
       </div>
-    </section>
 
-    <section class="view" id="plus">
-      <div class="section-heading"><div><span class="eyebrow">ASSINATURA</span><h2>PlayStation Plus</h2><p class="sub">Catálogos Extra e Deluxe no Brasil.</p></div></div>
-      <div class="panel">
-        <div class="notice"><b>Catálogo ainda não sincronizado.</b> Não há integração oficial automática nem uma lista brasileira validada cadastrada neste projeto. Por isso, não vamos apresentar jogos como incluídos sem confirmação.</div>
-        <div class="controls">
-          <label class="search-wrap"><span class="sr-only">Buscar no catálogo Plus</span><input id="psSearch" type="search" placeholder="Buscar na lista…" oninput="renderPlus()"></label>
-          <label><span class="sr-only">Filtrar plano</span><select id="psTier" onchange="renderPlus()"><option value="">Extra + Deluxe</option><option value="extra">Catálogo Extra</option><option value="classics">Clássicos · Deluxe</option><option value="trial">Avaliações · Deluxe</option></select></label>
-          <label><span class="sr-only">Filtrar plataforma</span><select id="psPlatform" onchange="renderPlus()"><option value="">PS4 e PS5</option><option>PS5</option><option>PS4</option></select></label>
+      <details class="collection-drawer">
+        <summary><span>Minha coleção</span><span class="muted">Favoritos e progresso</span></summary>
+        <div class="panel">
+          <p id="collectionStats" class="collection-stats" aria-live="polite">Sua coleção fica salva somente neste aparelho.</p>
+          <div class="collection-backup"><div><b>Backup da coleção</b><p>Leve seus favoritos e seu progresso para outro aparelho.</p></div><div class="collection-backup-actions"><button class="btn small" type="button" onclick="exportCollectionBackup()">Exportar</button><button class="btn small quiet" type="button" onclick="document.getElementById('collectionImportFile').click()">Importar</button></div><input id="collectionImportFile" type="file" accept="application/json,.json" hidden onchange="importCollectionBackup(this)"></div>
+          <p id="collectionBackupMsg" class="fineprint muted" role="status" aria-live="polite"></p>
+          <div id="collectionFilters" class="collection-filters" role="group" aria-label="Filtrar minha coleção"></div>
+          <div class="grid" id="favorites"></div>
         </div>
-        <div id="plusList" class="grid"></div>
-        <a class="text-link" href="https://www.playstation.com/pt-br/ps-plus/games/" target="_blank" rel="noopener">Consultar catálogo oficial PlayStation ↗</a>
-      </div>
-    </section>
-
-    <section class="view" id="saved">
-      <div class="section-heading"><div><span class="eyebrow">SUA COLEÇÃO</span><h2>Minha biblioteca</h2><p class="sub">Organize o que quer jogar, está jogando e já zerou.</p></div></div>
-      <div class="panel">
-        <p id="collectionStats" class="collection-stats" aria-live="polite">Sua coleção fica salva somente neste aparelho.</p>
-        <div class="collection-backup"><div><b>Backup da coleção</b><p>Leve seus favoritos e seu progresso para outro aparelho.</p></div><div class="collection-backup-actions"><button class="btn small" type="button" onclick="exportCollectionBackup()">Exportar</button><button class="btn small quiet" type="button" onclick="document.getElementById('collectionImportFile').click()">Importar</button></div><input id="collectionImportFile" type="file" accept="application/json,.json" hidden onchange="importCollectionBackup(this)"></div>
-        <p id="collectionBackupMsg" class="fineprint muted" role="status" aria-live="polite"></p>
-        <div id="collectionFilters" class="collection-filters" role="group" aria-label="Filtrar minha coleção"></div>
-        <div class="grid" id="favorites"></div>
-        <p class="fineprint muted">Seus jogos e seu progresso ficam salvos neste navegador, sem criar conta.</p>
-      </div>
+      </details>
     </section>
 
     <section class="view" id="settings">
-      <div class="section-heading"><div><span class="eyebrow">PREFERÊNCIAS</span><h2>Conexões</h2><p class="sub">Configure os dados adicionais usados nas recomendações.</p></div></div>
+      <div class="section-heading"><div><span class="eyebrow">PREFERÊNCIAS</span><h2>Conexões</h2><p class="sub">Configure os dados adicionais usados nas recomendações.</p></div><button class="btn small quiet" type="button" onclick="go('discover')">Voltar</button></div>
       <div class="panel">
         <div class="connection-row"><span class="connection-dot"></span><div><b>Biblioteca geral de PS5</b><p class="sub">Fonte comunitária pública, não exige chave.</p></div></div>
         <div class="actions" style="margin-top:12px"><button class="btn quiet" type="button" onclick="installApp()">Instalar como aplicativo</button></div>
