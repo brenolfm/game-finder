@@ -1,5 +1,5 @@
 
-const KEY='gf_rawg_key',FAV='gf_favorites',PLUS='gf_plus',COLL='gf_collection',TRANS='gf_translations';const CATALOG_BASE='https://raw.githubusercontent.com/Ephellon/game-store-catalog/main/ps5/';const PAGE_SIZE=24;let pageNo=1,maxPage=1,answers={},activeGame=null,installPrompt=null,catalogCache={},catalogMeta=null,catalogCurrent=[],catalogById={},activeStoreGame=null,plusCatalog=null,plusCatalogPromise=null,detailToken=0,rawgSearchCache={},rawgScreenshotCache={},rawgDetailsCache={},collectionFilter='all',searchTimer=null,searchSequence=0,rawgRatingIndexes={best:null,worst:null},rawgRatingPromises={best:null,worst:null},allCatalogCache=null,allCatalogPromise=null,manualCatalogLetter='*';
+const KEY='gf_rawg_key',FAV='gf_favorites',PLUS='gf_plus',COLL='gf_collection',TRANS='gf_translations';const CATALOG_BASE='https://raw.githubusercontent.com/Ephellon/game-store-catalog/main/ps5/';const PAGE_SIZE=24;let pageNo=1,maxPage=1,answers={},activeGame=null,installPrompt=null,catalogCache={},catalogMeta=null,catalogCurrent=[],catalogById={},activeStoreGame=null,plusCatalog=null,plusCatalogPromise=null,detailToken=0,rawgSearchCache={},rawgScreenshotCache={},rawgDetailsCache={},collectionFilter='all',searchTimer=null,searchSequence=0,rawgRatingIndexes={best:null,worst:null},rawgRatingPromises={best:null,worst:null},rawgRatingLookupCache={best:new Map(),worst:new Map()},allCatalogCache=null,allCatalogPromise=null,manualCatalogLetter='*';
 const $=id=>document.getElementById(id),key=()=>localStorage.getItem(KEY)||'';
 function go(id){
  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===id));
@@ -448,13 +448,17 @@ function ratingForCatalogGame(game){
  if(!index)return null;
  const title=normalizeGameTitle(game&&game.name);
  if(!title)return null;
- if(index[title])return index[title];
+ const cache=rawgRatingLookupCache[mode];
+ if(cache.has(title))return cache.get(title);
+ if(index[title]){cache.set(title,index[title]);return index[title]}
  let best=null,bestScore=0;
  for(const [name,value] of Object.entries(index)){
   const score=rawgMatchScore(title,name);
   if(score>bestScore){bestScore=score;best=value}
  }
- return bestScore>=.9?best:null;
+ const match=bestScore>=.9?best:null;
+ cache.set(title,match);
+ return match;
 }
 async function loadRawgRatingIndex(mode='best'){
  mode=mode==='worst'?'worst':'best';
