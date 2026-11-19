@@ -1,5 +1,5 @@
 
-const KEY='gf_rawg_key',FAV='gf_favorites',PLUS='gf_plus',COLL='gf_collection',TRANS='gf_translations';const CATALOG_BASE='https://raw.githubusercontent.com/Ephellon/game-store-catalog/main/ps5/';const PAGE_SIZE=24;let pageNo=1,maxPage=1,answers={},activeGame=null,installPrompt=null,catalogCache={},catalogMeta=null,catalogCurrent=[],catalogById={},activeStoreGame=null,plusCatalog=null,plusCatalogPromise=null,detailToken=0,rawgSearchCache={},rawgScreenshotCache={},rawgDetailsCache={},collectionFilter='all',searchTimer=null,searchSequence=0,rawgRatingIndexes={best:null,worst:null},rawgRatingPromises={best:null,worst:null},allCatalogCache=null,allCatalogPromise=null;
+const KEY='gf_rawg_key',FAV='gf_favorites',PLUS='gf_plus',COLL='gf_collection',TRANS='gf_translations';const CATALOG_BASE='https://raw.githubusercontent.com/Ephellon/game-store-catalog/main/ps5/';const PAGE_SIZE=24;let pageNo=1,maxPage=1,answers={},activeGame=null,installPrompt=null,catalogCache={},catalogMeta=null,catalogCurrent=[],catalogById={},activeStoreGame=null,plusCatalog=null,plusCatalogPromise=null,detailToken=0,rawgSearchCache={},rawgScreenshotCache={},rawgDetailsCache={},collectionFilter='all',searchTimer=null,searchSequence=0,rawgRatingIndexes={best:null,worst:null},rawgRatingPromises={best:null,worst:null},allCatalogCache=null,allCatalogPromise=null,manualCatalogLetter='*';
 const $=id=>document.getElementById(id),key=()=>localStorage.getItem(KEY)||'';
 function go(id){
  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===id));
@@ -421,8 +421,14 @@ function scheduleSearch(){
  clearTimeout(searchTimer);
  searchTimer=setTimeout(()=>searchGames(true),240);
 }
+function selectCatalogLetter(value){
+ manualCatalogLetter=value||'*';
+ $('letter').value=manualCatalogLetter;
+ searchGames(true);
+}
 function clearGameSearch(){
  $('search').value='';
+ $('letter').value=manualCatalogLetter;
  searchGames(true);
  $('search').focus();
 }
@@ -509,10 +515,11 @@ async function searchGames(reset){
  if(reset)pageNo=1;
  const token=++searchSequence;
  const term=($('search').value||'').trim();
- let letter=$('letter').value||'a';
+ let letter=manualCatalogLetter||'*';
  if(term){
   const first=normalizeGameTitle(term).charAt(0).toLowerCase();
   letter=/[a-z]/.test(first)?first:'_';
+ }else{
   $('letter').value=letter;
  }
  $('results').innerHTML='<div class="empty">Atualizando os jogos…</div>';
