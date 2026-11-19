@@ -1,5 +1,5 @@
 
-const KEY='gf_rawg_key',FAV='gf_favorites',PLUS='gf_plus',COLL='gf_collection',TRANS='gf_translations';const CATALOG_BASE='https://raw.githubusercontent.com/Ephellon/game-store-catalog/main/ps5/';const PAGE_SIZE=24;let pageNo=1,maxPage=1,answers={},activeGame=null,installPrompt=null,catalogCache={},catalogMeta=null,catalogCurrent=[],catalogById={},activeStoreGame=null,plusCatalog=null,plusCatalogPromise=null,detailToken=0,rawgSearchCache={},rawgScreenshotCache={},rawgDetailsCache={},collectionFilter='all',searchTimer=null,searchSequence=0,rawgRatingIndexes={best:null,worst:null},rawgRatingPromises={best:null,worst:null},rawgRatingLookupCache={best:new Map(),worst:new Map()},allCatalogCache=null,allCatalogPromise=null,manualCatalogLetter='*';
+const KEY='gf_rawg_key',FAV='gf_favorites',PLUS='gf_plus',COLL='gf_collection',TRANS='gf_translations';const CATALOG_BASE='https://raw.githubusercontent.com/Ephellon/game-store-catalog/main/ps5/';const PAGE_SIZE=24;let pageNo=1,maxPage=1,answers={},activeGame=null,installPrompt=null,catalogCache={},catalogMeta=null,catalogCurrent=[],catalogById={},activeStoreGame=null,plusCatalog=null,plusCatalogPromise=null,detailToken=0,rawgSearchCache={},rawgScreenshotCache={},rawgDetailsCache={},collectionFilter='all',searchTimer=null,searchSequence=0,rawgRatingIndexes={best:null,worst:null},rawgRatingPromises={best:null,worst:null},rawgRatingLookupCache={best:new Map(),worst:new Map()},allCatalogCache=null,allCatalogPromise=null,manualCatalogLetter='*',recommendationPool=[],recommendationCursor=0;
 const $=id=>document.getElementById(id),key=()=>localStorage.getItem(KEY)||'';
 function go(id){
  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===id));
@@ -593,17 +593,34 @@ function buildQuestions(){
 }
 function pick(b){answers[b.dataset.q]=b.dataset.v;document.querySelectorAll('[data-q="'+b.dataset.q+'"]').forEach(x=>x.classList.toggle('selected',x===b))}
 function resetQ(){answers={};buildQuestions();$('recommendations').innerHTML=''}
+function renderRecommendation(){
+ const game=recommendationPool[recommendationCursor];
+ if(!game){$('recommendations').innerHTML='<div class="empty">Não encontrei um jogo para esse filtro. Experimente outro gênero.</div>';return}
+ const total=recommendationPool.length;
+ $('recommendations').innerHTML='<div class="recommendation-result"><div class="result-heading"><h3>Minha indicação para você</h3><p class="sub">Sugestão '+(recommendationCursor+1)+' de '+total+' · baseada nas avaliações RAWG e no gênero escolhido.</p></div>'+card(game)+'<div class="recommendation-actions"><button class="btn primary" type="button" onclick="recommendNext()">Me indique outro jogo</button><button class="btn quiet" type="button" onclick="detailGame('+Number(game.id)+')">Ver detalhes</button></div></div>';
+}
+function recommendNext(){
+ if(!recommendationPool.length){recommend();return}
+ recommendationCursor=(recommendationCursor+1)%recommendationPool.length;
+ renderRecommendation();
+}
 async function recommend(){
  if(!key()){
-  $('recommendations').innerHTML='<div class="info">Para montar recomendações com dados da RAWG, conecte sua chave em Ajustes. A biblioteca geral continua disponível sem chave.</div><div class="row"><button class="btn primary" onclick="go(\'settings\')">Configurar RAWG</button><button class="btn" onclick="go(\'library\')">Explorar a biblioteca</button></div>';return;
+  $('recommendations').innerHTML='<div class="info">Para montar uma indicação com avaliações e gêneros da RAWG, conecte sua chave em Ajustes. A biblioteca completa continua disponível sem chave.</div><div class="row"><button class="btn primary" onclick="go(\'settings\')">Configurar RAWG</button><button class="btn" onclick="go(\'library\')">Explorar todos os jogos</button></div>';return;
  }
- $('recommendations').innerHTML='<div class="empty">Buscando recomendações…</div>';
+ $('recommendations').innerHTML='<div class="empty">Escolhendo um jogo para você…</div>';
  try{
-  const params={platforms:'187',page_size:30,ordering:'-rating'};
+  const params={platforms:'187',page_size:40,ordering:'-rating'};
   if(answers.mood)params.genres=answers.mood;
   const d=await api('/games',params);
-  const arr=(d.results||[]).slice(0,8);
-  $('recommendations').innerHTML='<div class="result-heading"><h3>Jogos para explorar</h3><p class="sub">'+(answers.mood?'Gênero selecionado: '+esc(answers.mood.replaceAll('-',' ')):'Seleção geral de PS5')+'</p></div><div class="grid">'+(arr.length?arr.map(card).join(''):'<div class="empty">A RAWG não retornou resultados para esse filtro.</div>')+'</div><p class="fineprint muted">Sugestões baseadas nos dados de gênero e avaliação retornados pela RAWG. Confira informações e disponibilidade na loja.</p>';
+  const arr=(d.results||[]).filter(game=>Number(game.rating)>0)
+   .sort((a,b)=>Number(b.rating)-Number(a.rating)||(Number(b.ratings_count)||0)-(Number(a.ratings_count)||0));
+  recommendationPool=arr.slice(0,12);recommendationCursor=0;
+  if(!recommendationPool.length){
+   $('recommendations').innerHTML='<div class="empty">A RAWG não encontrou jogos avaliados para esse gênero. Tente outro estilo.</div>';
+   return;
+  }
+  renderRecommendation();
  }catch(e){$('recommendations').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}
 }
 async function loadPlusCatalog(){
