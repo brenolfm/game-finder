@@ -198,6 +198,49 @@ function collectionCard(item){
 function setCollectionFilter(filter){
  collectionFilter=filter;renderFav();
 }
+function exportCollectionBackup(){
+ const payload={
+  format:'GAME-FINDER-BACKUP',
+  version:1,
+  exportedAt:new Date().toISOString(),
+  collection:read(COLL),
+  favorites:read(FAV)
+ };
+ try{
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob),link=document.createElement('a');
+  link.href=url;link.download='game-finder-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+  const msg=$('collectionBackupMsg');if(msg)msg.textContent='Backup exportado. Guarde o arquivo em um local seguro.';
+ }catch(error){
+  const msg=$('collectionBackupMsg');if(msg)msg.textContent='Não foi possível exportar o backup neste navegador.';
+ }
+}
+async function importCollectionBackup(input){
+ const file=input&&input.files&&input.files[0],msg=$('collectionBackupMsg');
+ if(!file)return;
+ try{
+  if(file.size>2*1024*1024)throw Error('O arquivo é muito grande para um backup do GAME FINDER.');
+  const data=JSON.parse(await file.text());
+  if(!data||data.format!=='GAME-FINDER-BACKUP'||!Array.isArray(data.collection)||!Array.isArray(data.favorites))throw Error('Este arquivo não parece ser um backup válido do GAME FINDER.');
+  const validStatuses=['want','playing','beaten','archived'];
+  const collectionItems=data.collection.filter(item=>item&&['string','number'].includes(typeof item.id)&&String(item.id)&&typeof item.name==='string'&&validStatuses.includes(item.status)).slice(0,2000);
+  const favoriteItems=data.favorites.filter(item=>item&&['string','number'].includes(typeof item.id)&&String(item.id)&&typeof item.name==='string').slice(0,2000);
+  const collectionMap=new Map(read(COLL).map(item=>[String(item.id),item]));
+  collectionItems.forEach(item=>collectionMap.set(String(item.id),item));
+  const favoriteMap=new Map(read(FAV).map(item=>[String(item.id),item]));
+  favoriteItems.forEach(item=>favoriteMap.set(String(item.id),item));
+  localStorage.setItem(COLL,JSON.stringify([...collectionMap.values()]));
+  localStorage.setItem(FAV,JSON.stringify([...favoriteMap.values()]));
+  collectionFilter='all';renderFav();
+  if(msg)msg.textContent='Backup importado e mesclado com seus dados atuais. Seus jogos anteriores foram preservados.';
+ }catch(error){
+  if(msg)msg.textContent=error.message||'Não foi possível ler este backup.';
+ }finally{
+  if(input)input.value='';
+ }
+}
 function renderFav(){
  const favorites=read(FAV),collection=read(COLL),map=new Map();
  favorites.forEach(item=>map.set(String(item.id),{...item,isFavorite:true}));
