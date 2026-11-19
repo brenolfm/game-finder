@@ -57,13 +57,19 @@ function saveTranslationCache(cacheKey,value){
   localStorage.setItem(TRANS,JSON.stringify(Object.fromEntries(entries)));
  }catch(e){/* cache is optional; translation still appears in this session */}
 }
-function splitTranslationChunks(value,maxLength=430){
- const chunks=[];let rest=value;
+async function fetchWithTimeout(url,options={},timeoutMs=12000){
+ if(typeof AbortController==='undefined')return fetch(url,options);
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
+ try{return await fetch(url,{...options,signal:controller.signal})}finally{clearTimeout(timer)}
+}
+function splitTranslationChunks(value,maxBytes=430){
+ const chunks=[],encoder=new TextEncoder();let rest=value;
  while(rest.length){
-  let cut=Math.min(maxLength,rest.length);
+  let cut=Math.min(rest.length,maxBytes);
+  while(cut>1&&encoder.encode(rest.slice(0,cut)).length>maxBytes)cut--;
   if(cut<rest.length){
    const boundary=Math.max(rest.lastIndexOf('. ',cut),rest.lastIndexOf('! ',cut),rest.lastIndexOf('? ',cut),rest.lastIndexOf(' ',cut));
-   if(boundary>Math.floor(maxLength*.55))cut=boundary+1;
+   if(boundary>Math.floor(cut*.55))cut=boundary+1;
   }
   chunks.push(rest.slice(0,cut).trim());rest=rest.slice(cut).trim();
  }
@@ -72,7 +78,7 @@ function splitTranslationChunks(value,maxLength=430){
 async function googleTranslate(text){
  const url=new URL('https://translate.googleapis.com/translate_a/single');
  url.searchParams.set('client','gtx');url.searchParams.set('sl','auto');url.searchParams.set('tl','pt');url.searchParams.set('dt','t');url.searchParams.set('q',text);
- const response=await fetch(url,{headers:{Accept:'application/json'}});
+ const response=await fetchWithTimeout(url,{headers:{Accept:'application/json'}},12000);
  if(!response.ok)throw Error('Serviço de tradução indisponível ('+response.status+').');
  const data=await response.json();
  const translated=Array.isArray(data)&&Array.isArray(data[0])?data[0].map(part=>part&&part[0]||'').join(''):'';
@@ -84,7 +90,7 @@ async function myMemoryTranslate(text){
  for(const chunk of chunks){
   const url=new URL('https://api.mymemory.translated.net/get');
   url.searchParams.set('q',chunk);url.searchParams.set('langpair','en|pt-BR');
-  const response=await fetch(url,{headers:{Accept:'application/json'}});
+  const response=await fetchWithTimeout(url,{headers:{Accept:'application/json'}},12000);
   if(!response.ok)throw Error('O serviço alternativo de tradução não respondeu.');
   const data=await response.json(),value=data&&data.responseData&&data.responseData.translatedText;
   if(!value||String(value).toLowerCase().includes('quota exceeded'))throw Error('Limite diário do serviço alternativo atingido.');
@@ -210,7 +216,7 @@ function renderFav(){
 
 function card(g){
  const image=safeImage(g.background_image),id=Number(g.id);
- return '<article class="card" role="button" tabindex="0" onclick="detailGame('+id+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();detailGame('+id+')}"><div class="poster">'+(image?'<img class="cover" src="'+esc(image)+'" alt="Capa de '+esc(g.name)+'" loading="lazy">':'<span class="cover-fallback">GAME FINDER</span>')+'</div><div class="cardbody"><h3>'+esc(g.name)+'</h3><div class="chips"><span class="chip">★ '+(g.rating?Number(g.rating).toFixed(1):'—')+'</span><span class="chip">'+esc((g.genres||[]).slice(0,1).map(x=>x.name).join('')||'PS5')+'</span></div><p>'+esc(g.description_raw||'Abra a ficha para consultar os detalhes e as imagens disponíveis.')+'</p></div></article>';
+ return '<article class="card" role="button" tabindex="0" onclick="detailGame('+id+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();detailGame('+id+')}"><div class="poster">'+(image?'<img class="cover" src="'+esc(image)+'" alt="Capa de '+esc(g.name)+'" loading="lazy">':'<span class="cover-fallback">GAME FINDER</span>')+'</div><div class="cardbody"><h3>'+esc(g.name)+'</h3><div class="chips"><span class="chip">★ '+(g.rating?Number(g.rating).toFixed(1):'—')+'</span><span class="chip">'+esc((g.genres||[]).slice(0,1).map(x=>x.name).join('')||'PS5')+'</span></div><p>'+'Abra para ver a sinopse em português e as capturas do jogo.'+'</p></div></article>';
 }
 function catalogCard(g){
  const id=String(g.uuid||'').replace(/[^A-Za-z0-9_-]/g,'');if(!id)return '';
