@@ -62,3 +62,20 @@ Esta auditoria foi feita por inspeção do código e validação estática. Não
 ## Capturas in-game
 
 Ao abrir um título listado na biblioteca ou nos destaques, o aplicativo usa o nome para procurar uma correspondência PS5 na RAWG e carregar até 12 capturas de tela. A galeria aparece dentro da ficha do jogo e permite abrir cada imagem em tamanho maior. É necessário configurar a chave RAWG em Ajustes; se a RAWG não tiver correspondência ou capturas para o título, o app informa isso em vez de inventar imagens. Cada galeria inclui atribuição/link à RAWG.
+
+## Sinopses em português e experiência de coleção
+
+- Ao abrir uma ficha de jogo da RAWG ou um título do catálogo PS5, o GAME FINDER busca a descrição disponível, tenta traduzi-la automaticamente para português e gera um resumo curto para leitura rápida.
+- A descrição traduzida e a original ficam disponíveis em seções expansíveis. Quando a tradução não responde, o app informa a falha e mantém uma prévia do texto original.
+- A tradução é feita sob demanda por serviços externos sem chave própria; há um provedor alternativo. Esses serviços podem impor limites, mudar ou ficar indisponíveis. O GAME FINDER mantém a navegação e os demais dados mesmo quando a tradução falha.
+- Traduções recentes ficam em cache local (até 24 sinopses) para reduzir chamadas repetidas. Uma descrição muito extensa pode ser limitada a um trecho para manter a ficha rápida.
+- A tela **Minha biblioteca** permite classificar jogos como **Quero jogar**, **Jogando**, **Zerado** e **Arquivado**, além de continuar usando os favoritos. Esses dados ficam no navegador e não são enviados a um servidor.
+- O service worker passou a guardar os arquivos JSON das letras do catálogo PS5 já consultadas. Isso permite reabrir essas partes da biblioteca quando estiver sem internet; letras ainda não visitadas continuam dependendo da primeira conexão.
+
+## Otimizações e limites desta versão
+
+- As fichas e capturas RAWG são reutilizadas em memória durante a sessão para evitar consultas repetidas.
+- As capturas sem resultado e falhas temporárias são tratadas de forma diferente, evitando apresentar uma falha de rede como se o jogo não tivesse imagens.
+- Fechar a ficha invalida consultas assíncronas antigas, para impedir que uma resposta atrasada altere o jogo que está aberto.
+- A tradução automática é baseada em serviços públicos de terceiros; não é uma tradução editorial revisada e pode cometer erros em nomes próprios, termos de fantasia e expressões específicas.
+- A coleção e os favoritos continuam locais. Não há login, sincronização entre dispositivos, alertas push de lançamento ou recursos sociais. Esses recursos exigiriam uma arquitetura adicional.
