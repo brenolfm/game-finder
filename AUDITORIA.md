@@ -85,3 +85,34 @@ A navegação por teclado e os estados de foco foram melhorados. Ainda seria des
 - Se não houver chave configurada, correspondência confiável ou capturas, a ficha mostra uma mensagem explicativa. Não substitui imagens de gameplay por capas.
 - A galeria inclui link de atribuição à RAWG.
 - A pesquisa e as capturas dependem da chave configurada no navegador e da disponibilidade dos dados na RAWG; títulos pouco conhecidos podem não ter capturas.
+
+## Revisão de experiência e otimização — 18/11/2026
+
+### Melhorias aplicadas
+
+- **Sinopse em português:** a ficha agora tenta localizar a descrição completa na RAWG também para os jogos abertos a partir do catálogo geral de PS5.
+- **Resumo primeiro:** a descrição é traduzida automaticamente e reduzida a uma prévia curta; a ficha permite expandir a tradução completa e consultar o texto original.
+- **Resiliência da tradução:** há um serviço principal e uma alternativa sem chave própria. Quando ambos falham, a aplicação informa a indisponibilidade e mantém o texto original. A tradução depende de serviços públicos de terceiros e não é garantida.
+- **Cache local de tradução:** até 24 sinopses recentes ficam armazenadas no navegador, associadas ao jogo e ao texto de origem.
+- **Coleção inspirada em rastreadores de jogos:** a tela Minha biblioteca agora organiza os títulos em Quero jogar, Jogando, Zerados e Arquivados; a lista de favoritos continua disponível.
+- **Cache offline do catálogo:** os arquivos JSON das letras já consultadas passam a ser guardados pelo service worker. O modo offline cobre apenas os trechos visitados anteriormente, não todo o catálogo.
+- **Requisições reutilizadas:** detalhes e capturas da RAWG ficam em memória durante a sessão para reduzir chamadas duplicadas.
+- **Controle de consultas antigas:** trocar ou fechar a ficha invalida respostas assíncronas anteriores.
+- **Correções funcionais encontradas na revisão:** foram restabelecidas as rotinas de renderização da coleção e de montagem do questionário, que eram referenciadas pelo aplicativo sem estarem definidas no arquivo da versão revisada.
+
+### Testes realizados nesta revisão
+
+- Sintaxe do app.js: válida após as alterações.
+- Sintaxe do sw.js: válida após a alteração do cache.
+- IDs estáticos usados pelo JavaScript: conferidos contra o HTML; os IDs criados dinamicamente foram identificados separadamente.
+- Funções declaradas: verificada a ausência de nomes duplicados após a limpeza.
+- Cache do service worker: versão de shell atualizada para v9; cache de dados externo limitado aos arquivos JSON do catálogo comunitário PS5.
+- Não foi possível executar uma sessão autenticada de ponta a ponta com a chave RAWG guardada no navegador do usuário nem testar visualmente em seu Android. A validação final no aparelho continua necessária, especialmente para a tradução externa e para o comportamento offline.
+
+### Limitações mantidas
+
+- O resumo é automático e extrativo, não uma sinopse escrita por um editor ou por um modelo generativo. Pode selecionar frases menos relevantes em descrições muito longas.
+- Serviços de tradução gratuitos podem impor limites, responder com erro ou alterar seus endpoints. A aplicação mantém um fallback e não bloqueia o restante da ficha.
+- A coleção e os favoritos ficam no armazenamento local do navegador. Limpar os dados do site pode apagá-los; ainda não existe exportação nem sincronização.
+- Os alertas de lançamento, perfis, avaliações sociais e compartilhamento de coleções do Stash dependem de serviços adicionais e não foram copiados para esta aplicação estática.
+- O arquivo catalogo-psplus.json permanece sem dados regionais verificados; esta revisão não altera a situação da seção PS Plus.
