@@ -98,8 +98,9 @@
         <div class="actions" style="margin-top:12px"><button class="btn quiet" type="button" onclick="installApp()">Instalar como aplicativo</button></div>
         <div class="divider"></div>
         <h3>RAWG — detalhes e recomendações</h3>
-        <p class="sub">Pode fornecer sinopses, gêneros, avaliações e capturas de tela.</p>
+        <p class="sub">Pode fornecer sinopses, gêneros, avaliações e capturas de tela. Ao abrir um jogo, a sinopse é traduzida e resumida automaticamente em português.</p>
         <div class="info">A chave será salva somente neste navegador. Como a RAWG é consultada diretamente pelo aplicativo, ela pode ser vista por quem inspecionar as requisições deste aparelho. Não a publique no GitHub nem compartilhe capturas de tela que a mostrem.</div>
+        <div class="info">A tradução automática usa serviços externos sem chave própria e precisa de internet. Se algum serviço estiver fora do ar ou atingir seu limite, o app mostra a sinopse original.</div>
         <label class="field-label" for="apiKey">Chave da RAWG API</label>
         <input type="password" id="apiKey" placeholder="Cole sua chave pessoal" autocomplete="off" autocapitalize="off" spellcheck="false">
         <div class="actions"><button class="btn primary" type="button" onclick="saveKey()">Testar e salvar</button><button class="btn quiet" type="button" onclick="toggleKey()">Mostrar</button><button class="btn quiet" type="button" onclick="removeKey()">Apagar chave</button></div>
