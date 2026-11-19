@@ -12,13 +12,13 @@ URL: https://brenolfm.github.io/game-finder/
 
 - `index.html`: estrutura semântica da aplicação.
 - `styles.css`: sistema visual responsivo, com prioridade para celular.
-- `app.js`: navegação, catálogo, recomendações, favoritos e conexões.
+- `app.js`: navegação, catálogo, recomendações, favoritos, conexões e galeria de capturas in-game via RAWG.
 - `sw.js`: cache do shell da aplicação e estratégia offline básica.
 
 ## Fontes e limitações
 
 - A biblioteca PS5 consulta por letra o projeto comunitário [Ephellon/game-store-catalog](https://github.com/Ephellon/game-store-catalog). É uma fonte não oficial; a presença de um registro não garante disponibilidade, edição ou preço no Brasil.
-- A RAWG é opcional e fornece dados adicionais. A chave inserida pelo usuário é armazenada no `localStorage` do navegador e enviada diretamente à API RAWG nas consultas. Em uma aplicação estática, ela pode ser vista por quem tiver acesso ao navegador e às ferramentas de desenvolvedor. Não há chave embutida no repositório.
+- A RAWG é opcional e fornece dados adicionais, incluindo capturas in-game. Ao abrir um jogo da biblioteca, o app pesquisa uma correspondência na RAWG e consulta `/games/{id}/screenshots`. A chave inserida pelo usuário é armazenada no `localStorage` do navegador e enviada diretamente à API nas consultas. Em uma aplicação estática, ela pode ser vista por quem tiver acesso ao navegador e às ferramentas de desenvolvedor. Não há chave embutida no repositório.
 - O catálogo brasileiro de PlayStation Plus não está sincronizado nem preenchido com uma lista verificada. A interface deixa isso explícito e direciona à fonte oficial.
 
 ## Privacidade e armazenamento
@@ -58,3 +58,7 @@ O service worker mantém em cache os arquivos principais da interface. A consult
 - **Alto para expectativa do usuário:** catálogo PS Plus não está conectado; permanece identificado como pendente em vez de apresentar falsos resultados.
 
 Esta auditoria foi feita por inspeção do código e validação estática. Não equivale a teste completo em todos os modelos de telefone, navegadores ou contas de API.
+
+## Capturas in-game
+
+Ao abrir um título listado na biblioteca ou nos destaques, o aplicativo usa o nome para procurar uma correspondência PS5 na RAWG e carregar até 12 capturas de tela. A galeria aparece dentro da ficha do jogo e permite abrir cada imagem em tamanho maior. É necessário configurar a chave RAWG em Ajustes; se a RAWG não tiver correspondência ou capturas para o título, o app informa isso em vez de inventar imagens. Cada galeria inclui atribuição/link à RAWG.
