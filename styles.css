@@ -147,3 +147,27 @@ select{cursor:pointer}
  .cardbody{padding:8px}
  .pagination .btn{padding:8px 10px}
 }
+/* Sinopses em português e organização pessoal da coleção */
+.synopsis-card{padding:14px;margin:8px 0 14px;border:1px solid #314864;border-radius:13px;background:linear-gradient(145deg,#14243a,#0c1726)}
+.synopsis-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;color:var(--blue);font-size:10px;letter-spacing:.12em;font-weight:850}
+.synopsis-summary{margin:10px 0 12px!important;color:#edf3fc!important;font-size:14px;line-height:1.7}
+.synopsis-details{padding:9px 0;border-top:1px solid #2b3e56}
+.synopsis-details summary{color:#c7d8ee;font-size:12px;font-weight:700;cursor:pointer}
+.synopsis-details p{margin:9px 0 3px;color:#b9c7d9;font-size:12px;line-height:1.7;white-space:pre-line}
+.collection-box{margin:16px 0;padding:13px;border:1px solid #314864;border-radius:13px;background:#0d1929}
+.collection-box>label{display:block;margin-bottom:7px;color:#c8d5e7;font-size:11px;font-weight:800}
+.collection-control{display:flex;align-items:center;gap:8px}
+.collection-control select{flex:1}
+.collection-control .btn{flex:0 0 auto}
+.collection-stats{margin:0 0 12px;color:#9eacc0;font-size:12px}
+.collection-filters{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 10px;margin-bottom:11px;scrollbar-width:thin}
+.filter-chip{flex:0 0 auto;min-height:36px;padding:7px 12px;border:1px solid #344963;border-radius:30px;background:#0b1524;color:#c3d0e2;font-size:11px;font-weight:650}
+.filter-chip.active{border-color:var(--blue);background:#213a5b;color:#fff}
+@media(max-width:640px){
+ .synopsis-card{padding:12px}
+ .synopsis-summary{font-size:13px;line-height:1.65}
+ .collection-control{align-items:stretch}
+ .collection-control .btn{min-width:86px}
+ .collection-stats{font-size:11px}
+ .filter-chip{min-height:38px}
+}
