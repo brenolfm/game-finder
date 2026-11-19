@@ -49,7 +49,7 @@ select{cursor:pointer}
 .list-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0}
 .muted{color:var(--muted)}
 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
-.card{min-width:0;overflow:hidden;border:1px solid #263a53;border-radius:14px;background:#0b1524;cursor:pointer;transition:transform .16s,border-color .16s,background .16s}
+.card-link{display:block;color:inherit;text-decoration:none}.card{min-width:0;overflow:hidden;border:1px solid #263a53;border-radius:14px;background:#0b1524;cursor:pointer;transition:transform .16s,border-color .16s,background .16s}
 .card:hover{transform:translateY(-2px);border-color:#506d91;background:#101e30}
 .poster{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;aspect-ratio:16/10;background:linear-gradient(145deg,#203650,#111d2e)}
 .cover{display:block;width:100%;height:100%;object-fit:cover}
