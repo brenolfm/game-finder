@@ -1,5 +1,5 @@
 
-const KEY='gf_rawg_key',FAV='gf_favorites',PLUS='gf_plus',COLL='gf_collection',TRANS='gf_translations';const CATALOG_BASE='https://raw.githubusercontent.com/Ephellon/game-store-catalog/main/ps5/';const PAGE_SIZE=24;let pageNo=1,maxPage=1,answers={},activeGame=null,installPrompt=null,catalogCache={},catalogMeta=null,catalogCurrent=[],catalogById={},activeStoreGame=null,plusCatalog=null,plusCatalogPromise=null,detailToken=0,rawgSearchCache={},rawgScreenshotCache={},rawgDetailsCache={},collectionFilter='all',searchTimer=null,searchSequence=0,rawgRatingIndex=null,rawgRatingPromise=null,allCatalogCache=null,allCatalogPromise=null;
+const KEY='gf_rawg_key',FAV='gf_favorites',PLUS='gf_plus',COLL='gf_collection',TRANS='gf_translations';const CATALOG_BASE='https://raw.githubusercontent.com/Ephellon/game-store-catalog/main/ps5/';const PAGE_SIZE=24;let pageNo=1,maxPage=1,answers={},activeGame=null,installPrompt=null,catalogCache={},catalogMeta=null,catalogCurrent=[],catalogById={},activeStoreGame=null,plusCatalog=null,plusCatalogPromise=null,detailToken=0,rawgSearchCache={},rawgScreenshotCache={},rawgDetailsCache={},collectionFilter='all',searchTimer=null,searchSequence=0,rawgRatingIndexes={best:null,worst:null},rawgRatingPromises={best:null,worst:null},allCatalogCache=null,allCatalogPromise=null;
 const $=id=>document.getElementById(id),key=()=>localStorage.getItem(KEY)||'';
 function go(id){
  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===id));
@@ -430,43 +430,41 @@ function plusItemForGame(game){
  if(!plusCatalog||!plusCatalog.length)return null;
  const title=normalizeGameTitle(game&&game.name);
  if(!title)return null;
- let found=plusCatalog.find(item=>normalizeGameTitle(item.name)===title);
- if(found)return found;
- for(const item of plusCatalog){
-  const aliases=Array.isArray(item.aliases)?item.aliases:[];
-  if(aliases.some(name=>normalizeGameTitle(name)===title))return item;
-  const candidate=normalizeGameTitle(item.name);
-  if(candidate.length>8&&(candidate.includes(title)||title.includes(candidate)))return item;
- }
- return null;
+ return plusCatalog.find(item=>{
+  const names=[item.name,...(Array.isArray(item.aliases)?item.aliases:[])];
+  return names.some(name=>normalizeGameTitle(name)===title);
+ })||null;
 }
 function ratingForCatalogGame(game){
- if(!rawgRatingIndex)return null;
+ const mode=$('order')&&$('order').value==='-rating'?'worst':'best';
+ const index=rawgRatingIndexes[mode]||rawgRatingIndexes.best;
+ if(!index)return null;
  const title=normalizeGameTitle(game&&game.name);
  if(!title)return null;
- if(rawgRatingIndex[title])return rawgRatingIndex[title];
+ if(index[title])return index[title];
  let best=null,bestScore=0;
- for(const [name,value] of Object.entries(rawgRatingIndex)){
+ for(const [name,value] of Object.entries(index)){
   const score=rawgMatchScore(title,name);
   if(score>bestScore){bestScore=score;best=value}
  }
  return bestScore>=.9?best:null;
 }
-async function loadRawgRatingIndex(){
- if(rawgRatingIndex)return rawgRatingIndex;
- if(rawgRatingPromise)return rawgRatingPromise;
+async function loadRawgRatingIndex(mode='best'){
+ mode=mode==='worst'?'worst':'best';
+ if(rawgRatingIndexes[mode])return rawgRatingIndexes[mode];
+ if(rawgRatingPromises[mode])return rawgRatingPromises[mode];
  if(!key())throw Error('Configure a chave RAWG em Ajustes para ordenar por avaliação.');
- rawgRatingPromise=(async()=>{
-  const cacheKey='gf_catalog_ratings_v1';
+ rawgRatingPromises[mode]=(async()=>{
+  const cacheKey='gf_catalog_ratings_'+mode+'_v1';
   try{
    const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');
    if(cached&&cached.items&&Date.now()-cached.savedAt<7*24*60*60*1000){
-    rawgRatingIndex=cached.items;return rawgRatingIndex;
+    rawgRatingIndexes[mode]=cached.items;return rawgRatingIndexes[mode];
    }
   }catch(e){}
-  const index={};
+  const index={},ordering=mode==='worst'?'rating':'-rating';
   for(let page=1;page<=4;page++){
-   const response=await api('/games',{platforms:'187',page_size:40,ordering:'-rating',page});
+   const response=await api('/games',{platforms:'187',page_size:40,ordering,page});
    (response.results||[]).forEach(game=>{
     const name=normalizeGameTitle(game.name),rating=Number(game.rating);
     if(name&&Number.isFinite(rating)&&rating>0&&!index[name]){
@@ -474,11 +472,11 @@ async function loadRawgRatingIndex(){
     }
    });
   }
-  rawgRatingIndex=index;
+  rawgRatingIndexes[mode]=index;
   try{localStorage.setItem(cacheKey,JSON.stringify({savedAt:Date.now(),items:index}))}catch(e){}
-  return rawgRatingIndex;
- })().catch(error=>{rawgRatingPromise=null;throw error});
- return rawgRatingPromise;
+  return rawgRatingIndexes[mode];
+ })().catch(error=>{rawgRatingPromises[mode]=null;throw error});
+ return rawgRatingPromises[mode];
 }
 function applyCatalogFilters(data,query){
  let output=data.slice();
@@ -522,7 +520,7 @@ async function searchGames(reset){
  try{
   const order=$('order').value,minRating=Number($('ratingFilter').value||0);
   const needsRatings=order==='rating'||order==='-rating'||minRating>0;
-  const [meta,data]=await Promise.all([loadCatalogMeta(),letter==='*'?loadAllCatalog():loadCatalogLetter(letter),loadPlusCatalog(),needsRatings?loadRawgRatingIndex():Promise.resolve(null)]);
+  const [meta,data]=await Promise.all([loadCatalogMeta(),letter==='*'?loadAllCatalog():loadCatalogLetter(letter),loadPlusCatalog(),needsRatings?loadRawgRatingIndex(order==='-rating'?'worst':'best'):Promise.resolve(null)]);
   if(token!==searchSequence)return;
   const filtered=applyCatalogFilters(data,term);
   catalogCurrent=filtered;
