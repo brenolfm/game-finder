@@ -1,5 +1,5 @@
 
-const KEY='gf_rawg_key',FAV='gf_favorites',PLUS='gf_plus',COLL='gf_collection',TRANS='gf_translations';const CATALOG_BASE='https://raw.githubusercontent.com/Ephellon/game-store-catalog/main/ps5/';const PAGE_SIZE=24;let pageNo=1,maxPage=1,answers={},activeGame=null,installPrompt=null,catalogCache={},catalogMeta=null,catalogCurrent=[],catalogById={},activeStoreGame=null,plusCatalog=null,plusCatalogPromise=null,detailToken=0,rawgSearchCache={},rawgScreenshotCache={},rawgDetailsCache={},collectionFilter='all',searchTimer=null,searchSequence=0,rawgRatingIndex=null,rawgRatingPromise=null;
+const KEY='gf_rawg_key',FAV='gf_favorites',PLUS='gf_plus',COLL='gf_collection',TRANS='gf_translations';const CATALOG_BASE='https://raw.githubusercontent.com/Ephellon/game-store-catalog/main/ps5/';const PAGE_SIZE=24;let pageNo=1,maxPage=1,answers={},activeGame=null,installPrompt=null,catalogCache={},catalogMeta=null,catalogCurrent=[],catalogById={},activeStoreGame=null,plusCatalog=null,plusCatalogPromise=null,detailToken=0,rawgSearchCache={},rawgScreenshotCache={},rawgDetailsCache={},collectionFilter='all',searchTimer=null,searchSequence=0,rawgRatingIndex=null,rawgRatingPromise=null,allCatalogCache=null,allCatalogPromise=null;
 const $=id=>document.getElementById(id),key=()=>localStorage.getItem(KEY)||'';
 function go(id){
  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===id));
@@ -385,6 +385,30 @@ async function loadCatalogMeta(){
  return catalogMeta;
 }
 async function loadCatalogLetter(letter){if(catalogCache[letter])return catalogCache[letter];const file=(letter==='_')?'_.json':letter+'.json';const r=await fetch(CATALOG_BASE+file,{cache:'no-cache'});if(!r.ok)throw Error('Não foi possível consultar a base externa ('+r.status+'). Tente novamente em instantes.');const data=await r.json();if(!Array.isArray(data))throw Error('A fonte retornou um formato inesperado.');catalogCache[letter]=data.filter(g=>g&&g.name&&Array.isArray(g.platforms)&&g.platforms.includes('PS5'));return catalogCache[letter]}
+async function loadAllCatalog(){
+ if(allCatalogCache)return allCatalogCache;
+ if(allCatalogPromise)return allCatalogPromise;
+ allCatalogPromise=(async()=>{
+  const letters=['_','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+  const records=[];
+  for(let index=0;index<letters.length;index+=4){
+   const batch=letters.slice(index,index+4);
+   const results=await Promise.all(batch.map(letter=>loadCatalogLetter(letter).catch(error=>{
+    if(String(error.message||'').includes('(404)'))return [];
+    throw error;
+   })));
+   results.forEach(items=>records.push(...items));
+   const count=Math.min(index+batch.length,letters.length);
+   const countNode=$('count');
+   if(countNode)countNode.textContent='Carregando catálogo completo… '+count+' de '+letters.length+' grupos';
+  }
+  const unique=new Map();
+  records.forEach(game=>{const id=String(game.uuid||game.href||game.name);if(!unique.has(id))unique.set(id,game)});
+  allCatalogCache=[...unique.values()];
+  return allCatalogCache;
+ })().catch(error=>{allCatalogPromise=null;throw error});
+ return allCatalogPromise;
+}
 function renderCatalogPage(){
  const arr=catalogCurrent.slice((pageNo-1)*PAGE_SIZE,pageNo*PAGE_SIZE);
  $('results').innerHTML=arr.length?arr.map(catalogCard).join(''):'<div class="empty">Nenhum jogo encontrado com esses filtros. Experimente limpar a busca ou mudar a letra.</div>';
@@ -498,7 +522,7 @@ async function searchGames(reset){
  try{
   const order=$('order').value,minRating=Number($('ratingFilter').value||0);
   const needsRatings=order==='rating'||order==='-rating'||minRating>0;
-  const [meta,data]=await Promise.all([loadCatalogMeta(),loadCatalogLetter(letter),loadPlusCatalog(),needsRatings?loadRawgRatingIndex():Promise.resolve(null)]);
+  const [meta,data]=await Promise.all([loadCatalogMeta(),letter==='*'?loadAllCatalog():loadCatalogLetter(letter),loadPlusCatalog(),needsRatings?loadRawgRatingIndex():Promise.resolve(null)]);
   if(token!==searchSequence)return;
   const filtered=applyCatalogFilters(data,term);
   catalogCurrent=filtered;
@@ -507,7 +531,7 @@ async function searchGames(reset){
   const plusCount=plusCatalog.filter(item=>item.available_with_deluxe).length;
   const note=needsRatings?' · notas RAWG quando disponíveis':'';
   const plusNote=$('psPlusFilter').value==='deluxe'?' · relação PS Plus verificada em 18/11/2026 (recorte da fonte)':'';
-  $('count').textContent=catalogCurrent.length.toLocaleString('pt-BR')+' jogos nesta letra · '+total+' no catálogo'+note+plusNote;
+  $('count').textContent=catalogCurrent.length.toLocaleString('pt-BR')+' jogos encontrados · '+total+' no catálogo'+(letter==='*'?' · todas as letras':' · letra '+letter.toUpperCase())+note+plusNote;
   $('results').dataset.loaded='true';$('status').textContent='● Catálogo PS5 conectado';
   renderCatalogPage();
  }catch(error){
